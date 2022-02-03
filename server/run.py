@@ -15,12 +15,12 @@ def disconnect():
     print('Disconnected...')
 
 
-@sio.on("sendMessage")
+@sio.on("message")
 def receive_message(data):
     with message_lock:
         print(data)
         for i in range(int(data['count']) * 5, int(data['count']) * 5 + 5):
-            sio.emit('message', {'data': i})
+            sio.emit('message', {'count': i})
             time.sleep(1)
 
 
