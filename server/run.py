@@ -2,7 +2,7 @@ import time
 from app import create_app, sio
 from threading import Lock
 
-message_lock = Lock()
+lock = Lock()
 
 
 @sio.on('connect')
@@ -15,12 +15,12 @@ def disconnect():
     print('Disconnected...')
 
 
-@sio.on("message")
+@sio.on("ping_server")
 def receive_message(data):
-    with message_lock:
-        print(data)
-        for i in range(int(data['count']) * 5, int(data['count']) * 5 + 5):
-            sio.emit('message', {'count': i})
+    with lock:
+        count = int(data['count']) * 5
+        for i in range(count, count + 5):
+            sio.emit('update_count', {'count': i})
             time.sleep(1)
 
 
