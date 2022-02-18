@@ -1,6 +1,7 @@
-import "./ConnectionBar.css";
+import "./ConnectionState.css";
 import { useContext, useState, useEffect } from "react";
 import { SocketContext } from "../../context/socket";
+import ConnectionButton from "./ConnectionButton";
 import events from "../../constants/events";
 
 const ConnectionState = () => {
@@ -38,8 +39,9 @@ const ConnectionState = () => {
   };
 
   return (
-    <div className="ConnectionBar">
+    <div className="ConnectionState">
       <p>It's {connected ? "Connected" : "Disconnected"}</p>
+      <ConnectionButton connected={connected} />
     </div>
   );
 };
