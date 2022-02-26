@@ -1,6 +1,6 @@
 import random
 
-from enums import CameraType
+from enums.camera_type import CameraType
 
 from camera_creator import CameraCreator
 from D435_creator import RealSenseD435Creator
