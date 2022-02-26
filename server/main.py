@@ -1,11 +1,11 @@
-import uvicorn
 from fastapi import FastAPI
+import uvicorn
 import socketio
 
 
-api = FastAPI()
+app = FastAPI()
 sio = socketio.AsyncServer(async_mode="asgi", cors_allowed_origins="*")
-app = socketio.ASGIApp(sio, api)
+sio_app = socketio.ASGIApp(sio)
 
 
 @sio.event
@@ -18,36 +18,37 @@ async def disconnect(sid):
     await show("Disconnected...")
 
 
-@api.on_event("startup")
+@app.on_event("startup")
 async def startup():
     await show("Starting up...")
 
 
-@api.on_event("shutdown")
+@app.on_event("shutdown")
 async def shutdown():
     await show("Shutting down...")
 
 
-@api.get("/")
+@app.get("/")
 async def index():
     await show("Index page...")
     return {"Hello": "World"}
 
 
-@api.get("/test")
+@app.get("/test")
 async def test():
     await show("Test page...")
-    return {"Hello": "World"}
+    return {"Hello": "Test"}
 
 
 async def show(message: str):
     print(message)
 
+app.mount('/', sio_app)
 
 if __name__ == "__main__":
     uvicorn.run(
         "main:app",
         host='127.0.0.1',
-        port=8000,
+        port=5000,
         reload=True
     )
