@@ -1,10 +1,24 @@
-from fastapi import FastAPI
 import uvicorn
 import socketio
 
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from app.core.config import Settings
+
+settings = Settings()
 
 app = FastAPI()
-sio = socketio.AsyncServer(async_mode="asgi", cors_allowed_origins="*")
+
+origins = [
+    "http://localhost:3000",
+]
+
+sio = socketio.AsyncServer(
+    async_mode=settings.SOCKET_ASYNC_MODE,
+    cors_allowed_origins=[],
+)
+
 sio_app = socketio.ASGIApp(sio)
 
 
@@ -31,7 +45,7 @@ async def shutdown():
 @app.get("/")
 async def index():
     await show("Index page...")
-    return {"Hello": "World"}
+    return [{"id": "1", "name": "World"}, {"id": "2", "name": "Hello"}]
 
 
 @app.get("/test")
@@ -43,12 +57,21 @@ async def test():
 async def show(message: str):
     print(message)
 
-app.mount('/', sio_app)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.mount(settings.SOCKET_MOUNT, sio_app)
 
 if __name__ == "__main__":
     uvicorn.run(
-        "main:app",
-        host='127.0.0.1',
-        port=5000,
-        reload=True
+        settings.ASGI_PROTOCOL,
+        host=settings.HOST,
+        port=settings.PORT,
+        reload=settings.ASGI_RELOAD,
     )
