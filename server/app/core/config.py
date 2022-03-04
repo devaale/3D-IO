@@ -1,4 +1,5 @@
 import os
+from typing import List, Optional
 from pydantic import BaseSettings
 
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -13,3 +14,5 @@ class Settings(BaseSettings):
     SOCKET_ASYNC_MODE: str = "asgi"
     ASGI_PROTOCOL: str = "main:app"
     ASGI_RELOAD: bool = False
+    CORS_ALLOWED_ORIGINS: List[str] = ["http://localhost:3000"]
+    ORIGINS: List[str] = []
