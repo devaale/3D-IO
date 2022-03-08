@@ -1,3 +1,4 @@
+import pstats
 import uvicorn
 import socketio
 
@@ -9,8 +10,10 @@ from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.db import init_db, get_session
-from app.models import Song, SongCreate
+
 from app.core.config import Settings
+from app.models.setting import Setting, SettingCreate
+
 
 settings = Settings()
 
@@ -36,6 +39,7 @@ async def disconnect(sid):
 
 @app.on_event("startup")
 async def on_startup():
+    # await init_db()
     pass
 
 
@@ -44,19 +48,20 @@ async def pong():
     return {"ping": "pong!"}
 
 
-@app.get("/songs", response_model=list[Song])
-async def get_songs(session: AsyncSession = Depends(get_session)):
-    result = await session.execute(select(Song))
+@app.get("/settings", response_model=list[Setting])
+async def get_settings(session: AsyncSession = Depends(get_session)):
+    result = await session.execute(select(Setting))
     return result.scalars().all()
 
 
-@app.post("/songs")
-async def add_song(song: SongCreate, session: AsyncSession = Depends(get_session)):
-    song = Song(name=song.name, artist=song.artist, year=song.year)
-    session.add(song)
+@app.post("/settings")
+async def add_setting(setting: SettingCreate, session: AsyncSession = Depends(get_session)):
+    setting = Setting(label=setting.label, value=setting.value, min_value=setting.value,
+                        max_value=setting.value, type=setting.type, measurement=setting.measurement)
+    session.add(setting)
     await session.commit()
-    await session.refresh(song)
-    return song
+    await session.refresh(setting)
+    return setting
 
 
 app.add_middleware(
