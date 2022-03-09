@@ -39,8 +39,7 @@ async def disconnect(sid):
 
 @app.on_event("startup")
 async def on_startup():
-    # await init_db()
-    pass
+    await init_db()
 
 
 @app.get("/ping")

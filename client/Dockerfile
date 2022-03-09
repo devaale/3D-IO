@@ -1,4 +1,4 @@
-FROM node:16
+FROM node:17
 
 WORKDIR /usr/src/app
 
@@ -6,15 +6,12 @@ ENV NODE_PATH=/node_modules
 ENV PATH=$PATH:/node_modules/.bin
 
 COPY package.json ./
+COPY package-lock.json ./
 
-COPY yarn.lock ./
-
-RUN yarn install
-
-RUN yarn global add serve
+RUN npm install
 
 COPY . ./
 
 EXPOSE 3000
 
-CMD yarn start
+CMD npm start
