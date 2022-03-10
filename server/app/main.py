@@ -13,7 +13,6 @@ from app.db import init_db, get_session
 from app.core.config import Settings
 from app.models.setting import Setting, SettingCreate, SettingDelete
 
-
 settings = Settings()
 
 app = FastAPI()
@@ -25,6 +24,9 @@ sio = socketio.AsyncServer(
 
 sio_app = socketio.ASGIApp(sio)
 
+@app.on_event("startup")
+async def on_startup():
+    await init_db()
 
 @sio.event
 async def connect(sid, environ):
@@ -40,16 +42,6 @@ async def disconnect(sid):
 async def update_setting(sid, data):
     new_value = data["value"]
     print(f'Updating setting: {new_value}')
-
-
-@app.on_event("startup")
-async def on_startup():
-    await init_db()
-
-
-@app.get("/ping")
-async def pong():
-    return {"ping": "pong!"}
 
 
 @app.delete("/settings/{id}", response_model=SettingDelete)
@@ -78,7 +70,6 @@ async def add_setting(setting: SettingCreate, session: AsyncSession = Depends(ge
     await session.commit()
     await session.refresh(db_setting)
     return db_setting
-
 
 app.add_middleware(
     CORSMiddleware,

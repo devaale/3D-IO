@@ -3,31 +3,32 @@ import { Container } from "@mui/material";
 
 import SettingItem from "./SettingItem";
 
-import { useEffect, useState } from "react";
+import { useQuery } from "react-query";
 
 const SettingGrid = () => {
-  const [settingsData, setSettingsData] = useState([]);
+  // Functions
+  async function getSettings() {
+    const res = await fetch(`http://localhost:8000/settings`);
+    return res.json();
+  }
 
-  useEffect((e) => {
-    fetchData();
-  }, []);
+  //Queries
+  const { isLoading, isError, data, error } = useQuery("settings", getSettings);
 
-  const fetchData = () => {
-    fetch(`http://localhost:8000/settings`)
-      .then((response) => response.json())
-      .then((data) => {
-        setSettingsData(data);
-      })
-      .catch((err) => {
-        setSettingsData(null);
-      });
-  };
+  //Reponse
+  if (isLoading) {
+    return <span>Loading...</span>;
+  }
+
+  if (isError) {
+    return <span>Error: {error.message}</span>;
+  }
 
   return (
     <Container maxWidth="md">
       <Grid container spacing={2} marginTop={10}>
-        {settingsData &&
-          settingsData.map((setting) => (
+        {data &&
+          data.map((setting) => (
             <SettingItem key={setting.id} setting={setting} />
           ))}
       </Grid>
