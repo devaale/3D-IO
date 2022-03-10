@@ -3,12 +3,13 @@ from sqlmodel import SQLModel, Field
 from ..enums.setting import MeasurementType, SettingType
 
 class SettingBase(SQLModel):
-    label: str
-    value: float
-    min_value: float
-    max_value: float
+    label: str = 'default'
+    value: float = 5
+    min_value: float = 0
+    max_value: float = 10
+    step: float = 1
     type: SettingType = SettingType.PROCESSING_GENERAL.value
-    measurement: MeasurementType = MeasurementType.PRECENTAGE.value
+    measurement: MeasurementType = MeasurementType.MILLIMETERS.value
 
 
 class Setting(SettingBase, table=True):
@@ -20,3 +21,6 @@ class SettingUpdate(SettingBase):
 
 class SettingCreate(SettingBase):
     pass
+
+class SettingDelete(SettingBase):
+    id: int

@@ -1,4 +1,3 @@
-import pstats
 import uvicorn
 import socketio
 
@@ -6,13 +5,13 @@ from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.db import init_db, get_session
 
 from app.core.config import Settings
-from app.models.setting import Setting, SettingCreate
+from app.models.setting import Setting, SettingCreate, SettingDelete
 
 
 settings = Settings()
@@ -29,12 +28,18 @@ sio_app = socketio.ASGIApp(sio)
 
 @sio.event
 async def connect(sid, environ):
-    print("Disconnected...")
+    print("Connected...")
 
 
 @sio.event
 async def disconnect(sid):
-    print("Connected...")
+    print("Disconnected...")
+
+#TODO: Find a way to parse event data to an object
+@sio.event
+async def update_setting(sid, data):
+    new_value = data["value"]
+    print(f'Updating setting: {new_value}')
 
 
 @app.on_event("startup")
@@ -47,20 +52,32 @@ async def pong():
     return {"ping": "pong!"}
 
 
+@app.delete("/settings/{id}", response_model=SettingDelete)
+async def delete_setting(id, session: AsyncSession = Depends(get_session)):
+    db_setting = await session.get(Setting, id)
+
+    if not db_setting:
+        raise HTTPException(status_code=404, detail="Setting not found")
+    
+    await session.delete(db_setting)
+    await session.commit()
+    return db_setting
+
+
 @app.get("/settings", response_model=list[Setting])
 async def get_settings(session: AsyncSession = Depends(get_session)):
-    result = await session.execute(select(Setting))
+    statement = select(Setting)
+    result = await session.execute(statement)
     return result.scalars().all()
 
 
 @app.post("/settings")
 async def add_setting(setting: SettingCreate, session: AsyncSession = Depends(get_session)):
-    setting = Setting(label=setting.label, value=setting.value, min_value=setting.value,
-                        max_value=setting.value, type=setting.type, measurement=setting.measurement)
-    session.add(setting)
+    db_setting = Setting.from_orm(setting)
+    session.add(db_setting)
     await session.commit()
-    await session.refresh(setting)
-    return setting
+    await session.refresh(db_setting)
+    return db_setting
 
 
 app.add_middleware(

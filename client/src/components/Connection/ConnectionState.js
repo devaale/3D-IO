@@ -11,23 +11,11 @@ const ConnectionState = () => {
 
   useEffect((e) => {
     mountEventListeners();
-    fetchData();
 
     return () => {
       unmountEventListeners();
     };
   });
-
-  const fetchData = () => {
-    fetch(`http://localhost:5050/`)
-      .then((response) => response.json())
-      .then((actualData) => {
-        setData(actualData);
-      })
-      .catch((err) => {
-        setData(null);
-      });
-  };
 
   const handleConnect = () => {
     setConnected(true);
@@ -54,15 +42,6 @@ const ConnectionState = () => {
   return (
     <div className="ConnectionState">
       <p>It's {connected ? "Connected" : "Disconnected"}</p>
-      <ConnectionButton connected={connected} />
-      <ul>
-        {data &&
-          data.map(({ id, name }) => (
-            <li key={id}>
-              <h3>{name}</h3>
-            </li>
-          ))}
-      </ul>
     </div>
   );
 };

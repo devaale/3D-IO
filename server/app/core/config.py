@@ -14,5 +14,5 @@ class Settings(BaseSettings):
     SOCKET_ASYNC_MODE: str = "asgi"
     ASGI_PROTOCOL: str = "main:app"
     ASGI_RELOAD: bool = False
-    CORS_ALLOWED_ORIGINS: List[str] = ["http://localhost:3000"]
-    ORIGINS: List[str] = []
+    CORS_ALLOWED_ORIGINS: List[str] = []
+    ORIGINS: List[str] = ["http://localhost:3000"]
