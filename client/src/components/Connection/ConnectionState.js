@@ -7,8 +7,9 @@ import events from "../../constants/events";
 const ConnectionState = () => {
   const socket = useContext(SocketContext);
   const [connected, setConnected] = useState(false);
+  const [data, setData] = useState([]);
 
-  useEffect(() => {
+  useEffect((e) => {
     mountEventListeners();
 
     return () => {
@@ -41,7 +42,6 @@ const ConnectionState = () => {
   return (
     <div className="ConnectionState">
       <p>It's {connected ? "Connected" : "Disconnected"}</p>
-      <ConnectionButton connected={connected} />
     </div>
   );
 };

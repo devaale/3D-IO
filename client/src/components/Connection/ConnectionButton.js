@@ -1,6 +1,7 @@
 import { useContext, useState } from "react";
 import { SocketContext } from "../../context/socket";
 import events from "../../constants/events";
+import Button from "@mui/material/Button";
 
 const CountButton = (props) => {
   const socket = useContext(SocketContext);
@@ -17,7 +18,9 @@ const CountButton = (props) => {
   return (
     <div>
       <p>Currently sent messages: {count}</p>
-      <button onClick={handleClick}>Click me!</button>
+      <Button variant="contained" onClick={handleClick}>
+        Click Me !
+      </Button>
     </div>
   );
 };
