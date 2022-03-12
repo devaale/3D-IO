@@ -9,6 +9,8 @@ from sqlmodel import SQLModel                       # NEW
 from alembic import context
 
 from app.models.setting import Setting
+from app.models.plc import Plc
+from app.models.plc_block import PlcBlock
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

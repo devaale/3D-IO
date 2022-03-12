@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.db import init_db
-from app.api import setting
+from app.api import setting, plc, plc_block
 from app.core.config import Settings
 
 settings = Settings()
@@ -47,5 +47,7 @@ app.add_middleware(
 )
 
 app.include_router(setting.router)
+app.include_router(plc.router)
+app.include_router(plc_block.router)
 
 app.mount(settings.SOCKET_MOUNT, sio_app)

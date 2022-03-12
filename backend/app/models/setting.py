@@ -1,6 +1,6 @@
 from sqlmodel import SQLModel, Field
 
-from ..enums.setting import MeasurementType, SettingType
+from app.enums.setting import MeasurementType, SettingType
 
 class SettingBase(SQLModel):
     label: str = 'default'
