@@ -29,7 +29,7 @@ async def on_startup():
 @app.on_event("shutdown")
 async def shutdown():
     pass
-    
+
 
 @sio.event
 async def connect(sid, environ):
@@ -40,11 +40,13 @@ async def connect(sid, environ):
 async def disconnect(sid):
     print("Disconnected...")
 
-#TODO: Find a way to parse event data to an object
+
+# TODO: Find a way to parse event data to an object
 @sio.event
 async def update_setting(sid, data):
     new_value = data["value"]
-    print(f'Updating setting: {new_value}')
+    print(f"Updating setting: {new_value}")
+
 
 app.add_middleware(
     CORSMiddleware,
