@@ -1,9 +1,10 @@
 import pytest
-from fastapi.testclient import TestClient
+from starlette.testclient import TestClient
 
 from app.main import app
 
 
 @pytest.fixture(scope="module")
 def test_app():
-    yield TestClient(app)
+    client = TestClient(app)
+    yield client

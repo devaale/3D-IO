@@ -1,6 +1,10 @@
+import os
+import pytest
+
 from tests.conftest import test_app
 
-def test_get_settings(test_app):
-    response = test_app.get("/settings")
-    assert response.status_code == 200
+ENDPOINT = "/settings"
 
+def test_settings_get(test_app):
+    response = test_app.get(ENDPOINT)
+    assert response.status_code == 200

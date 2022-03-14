@@ -13,6 +13,7 @@ class CRUDPlc:
         data = await session.execute(query)
         if not data:
             raise HTTPException(status_code=404, detail="Plc not found")
+            
         return data.scalars().first()
     
     async def add(session: AsyncSession, setting: PlcCreate) -> Plc:

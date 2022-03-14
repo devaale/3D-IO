@@ -9,7 +9,7 @@ class PlcBase(SQLModel):
 
 class Plc(PlcBase, table=True):
     id: int = Field(default=None, primary_key=True)
-    # blocks: List["PlcBlock"] = Relationship(back_populates="plc")
+    blocks: List["PlcBlock"] = Relationship(back_populates="plc")
 
 class PlcCreate(PlcBase):
     pass

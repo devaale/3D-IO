@@ -11,8 +11,8 @@ class PlcBlockBase(SQLModel):
 
 class PlcBlock(PlcBlockBase, table=True):
     id: int = Field(default=None, primary_key=True)
-    plc_id: int = Field(default=1, foreign_key="plc.id")
-    # plc: Optional[Plc] = Relationship(back_populates="blocks")
+    plc_id: Optional[int] = Field(default=1, foreign_key="plc.id")
+    plc: Optional[Plc] = Relationship(back_populates="blocks")
 
 class PlcBlockCreate(PlcBlockBase):
     pass
