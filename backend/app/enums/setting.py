@@ -1,8 +1,11 @@
-from enum import Enum
+from enum import Enum, auto
+from app.enums.base import AutoNameEnum
 
-class SettingType(int, Enum):
-    PROCESSING_GENERAL = 10
-    PROCESSING_ADVANCED = 20
+
+class SettingType(str, AutoNameEnum):
+    PROCESSING_GENERAL = auto()
+    PROCESSING_ADVANCED = auto()
+
 
 class MeasurementType(str, Enum):
     PRECENTAGE = "%"

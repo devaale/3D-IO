@@ -1,9 +1,10 @@
 from typing import List
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db import get_session
+from app.database.session import get_session
+
 from app.crud.plc_block import CRUDPlcBlock
 from app.models.plc_block import PlcBlock, PlcBlockCreate
 
@@ -11,13 +12,32 @@ router = APIRouter()
 
 # TODO: Check correctness of the API's
 @router.post("/plc-blocks", response_model=PlcBlock)
-async def add_plc_block(setting: PlcBlockCreate, session: AsyncSession = Depends(get_session)):
-    return await CRUDPlcBlock.add(session=session, setting=setting)
+async def plc_blocks_add(
+    data: PlcBlockCreate, session: AsyncSession = Depends(get_session)
+):
+    return await CRUDPlcBlock.add(session=session, data=data)
+
+
+@router.get("/plc-blocks/{id}", response_model=PlcBlock)
+async def plc_blocks_get(id: int, session: AsyncSession = Depends(get_session)):
+    data = await CRUDPlcBlock.get(session=session, id=id)
+
+    if not data:
+        raise HTTPException(status_code=404, detail="PLC block not found")
+
+    return data
+
 
 @router.delete("/plc-blocks/{id}", response_model=PlcBlock)
-async def delete_plc_block(id, session: AsyncSession = Depends(get_session)):
-    return await CRUDPlcBlock.delete(session, id)
+async def plc_blocks_delete(id: int, session: AsyncSession = Depends(get_session)):
+    data = await CRUDPlcBlock.get(session=session, id=id)
 
-@router.get("/plc-blocks/{plc-id}", response_model=List[PlcBlock])
-async def get_plc_blocks_by_plc(plc_id, session: AsyncSession = Depends(get_session)):
-    return await CRUDPlcBlock.get_all_by_plc(session=session, plc_id=plc_id)
+    if not data:
+        raise HTTPException(status_code=404, detail="PLC block not found")
+
+    return await CRUDPlcBlock.delete(session=session, data=data)
+
+
+@router.get("/plc-blocks", response_model=List[PlcBlock])
+async def plc_blocks_get_all(session: AsyncSession = Depends(get_session)):
+    return await CRUDPlcBlock.get_all(session=session)

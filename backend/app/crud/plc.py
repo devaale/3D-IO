@@ -1,34 +1,23 @@
-from fastapi import HTTPException
-from typing import List
-
-from sqlalchemy.future import select
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.models.plc import Plc, PlcCreate
 
-class CRUDPlc:
-    
-    async def get(session: AsyncSession) -> Plc:
-        query = select(Plc).where(Plc.id == 1)
-        data = await session.execute(query)
-        if not data:
-            raise HTTPException(status_code=404, detail="Plc not found")
-            
-        return data.scalars().first()
-    
-    async def add(session: AsyncSession, setting: PlcCreate) -> Plc:
-        data = Plc.from_orm(setting)
-        session.add(data)
-        await session.commit()
-        await session.refresh(data)
-        return data
-    
-    async def delete(session: AsyncSession, id: int) -> Plc:
-        data = await session.get(Plc, id)
+from sqlalchemy.ext.asyncio import AsyncSession
 
-        if not data:
-            raise HTTPException(status_code=404, detail="Plc not found")
-        
-        await session.delete(data)
+
+class CRUDPlc:
+    async def get(session: AsyncSession, id: int = 1) -> Plc:
+        return await session.get(Plc, id)
+
+    async def add(session: AsyncSession, data: PlcCreate) -> Plc:
+        entity = Plc.from_orm(data)
+        session.add(entity)
         await session.commit()
-        return data
+        await session.refresh(entity)
+        return entity
+
+    async def delete(session: AsyncSession, data: Plc) -> Plc:
+        entity = await session.delete(data)
+        await session.commit()
+        return entity
+
+    async def exists(session: AsyncSession, id: int = 1) -> bool:
+        return await session.get(Plc, id) is not None

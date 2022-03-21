@@ -1,10 +1,10 @@
-import uvicorn
 import socketio
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.db import init_db
+from app.database.seeder import seed_db
+from app.database.session import connect_db, disconnect_db
 
 from app.api import setting, plc, plc_block
 from app.core.config import Settings
@@ -23,12 +23,13 @@ sio_app = socketio.ASGIApp(sio)
 
 @app.on_event("startup")
 async def on_startup():
-    await init_db()
+    await connect_db()
+    await seed_db()
 
 
 @app.on_event("shutdown")
 async def shutdown():
-    pass
+    await disconnect_db()
 
 
 @sio.event
