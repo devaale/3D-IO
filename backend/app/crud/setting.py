@@ -1,6 +1,6 @@
 from typing import List
 
-from sqlalchemy.future import select
+from sqlmodel import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.setting import Setting, SettingCreate
@@ -11,7 +11,7 @@ class CRUDSetting:
         return await session.get(Setting, id)
 
     async def get_all(session: AsyncSession) -> List[Setting]:
-        query = select(Setting).all()
+        query = select(Setting)
         result = await session.execute(query)
         return result.scalars().all()
 

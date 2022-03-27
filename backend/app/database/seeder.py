@@ -1,6 +1,3 @@
-from fastapi import Depends
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.database.session import ScopedSession
 
 from app.crud.plc import CRUDPlc
@@ -11,7 +8,7 @@ from app.enums.plc_block import (
     PlcBlockMode,
     PlcBlockCommand,
     PlcBlockDataType,
-    PlcBlockDataTypeSize,
+    PlcBlockByteSize,
 )
 from app.models.plc_block import PlcBlockCreate
 
@@ -23,7 +20,6 @@ async def seed_db() -> None:
 
 async def seed_plc() -> None:
     async with ScopedSession() as session:
-        # TODO: Add actual PLC data
         plc = PlcCreate()
         _ = await CRUDPlc.add(session=session, data=plc)
 
@@ -37,10 +33,10 @@ async def seed_plc_blocks() -> None:
                 offset=0,
                 offset_bit=0,
                 db_num=db_num,
-                size=PlcBlockDataTypeSize.BOOL,
+                size=PlcBlockByteSize.BOOL,
                 mode=PlcBlockMode.WRITE.value,
                 data_type=PlcBlockDataType.BOOL.value,
-                command=PlcBlockCommand.CONN_EXIST.value,
+                command=PlcBlockCommand.CONNECTED.value,
             ),
             PlcBlockCreate(
                 desc="Camera trigger flag",
@@ -48,9 +44,9 @@ async def seed_plc_blocks() -> None:
                 offset_bit=0,
                 db_num=db_num,
                 mode=PlcBlockMode.READ,
-                size=PlcBlockDataTypeSize.BOOL,
+                size=PlcBlockByteSize.BOOL,
                 data_type=PlcBlockDataType.BOOL,
-                command=PlcBlockCommand.TRIGGER_CAM,
+                command=PlcBlockCommand.TRIGGER,
             ),
             PlcBlockCreate(
                 desc="Camera trigger flag ACK",
@@ -58,9 +54,9 @@ async def seed_plc_blocks() -> None:
                 offset_bit=1,
                 db_num=db_num,
                 mode=PlcBlockMode.WRITE,
-                size=PlcBlockDataTypeSize.BOOL,
+                size=PlcBlockByteSize.BOOL,
                 data_type=PlcBlockDataType.BOOL,
-                command=PlcBlockCommand.TRIGGER_CAM,
+                command=PlcBlockCommand.TRIGGER,
             ),
             PlcBlockCreate(
                 desc="Get product type",
@@ -68,9 +64,9 @@ async def seed_plc_blocks() -> None:
                 offset_bit=0,
                 db_num=db_num,
                 mode=PlcBlockMode.READ,
-                size=PlcBlockDataTypeSize.INT,
+                size=PlcBlockByteSize.INT,
                 data_type=PlcBlockDataType.INT,
-                command=PlcBlockCommand.PRODUCT_GET,
+                command=PlcBlockCommand.PRODUCT,
             ),
             PlcBlockCreate(
                 desc="Get product type ACK",
@@ -78,9 +74,9 @@ async def seed_plc_blocks() -> None:
                 offset_bit=0,
                 db_num=db_num,
                 mode=PlcBlockMode.WRITE,
-                size=PlcBlockDataTypeSize.INT,
+                size=PlcBlockByteSize.INT,
                 data_type=PlcBlockDataType.INT,
-                command=PlcBlockCommand.PRODUCT_GET,
+                command=PlcBlockCommand.PRODUCT,
             ),
             PlcBlockCreate(
                 desc="Learning mode enable",
@@ -88,9 +84,9 @@ async def seed_plc_blocks() -> None:
                 offset_bit=1,
                 db_num=db_num,
                 mode=PlcBlockMode.READ,
-                size=PlcBlockDataTypeSize.BOOL,
+                size=PlcBlockByteSize.BOOL,
                 data_type=PlcBlockDataType.BOOL,
-                command=PlcBlockCommand.LEARN_MODE_ON,
+                command=PlcBlockCommand.LEARN_MODE,
             ),
             PlcBlockCreate(
                 desc="Learning mode enable ACK",
@@ -98,9 +94,9 @@ async def seed_plc_blocks() -> None:
                 offset_bit=1,
                 db_num=db_num,
                 mode=PlcBlockMode.WRITE,
-                size=PlcBlockDataTypeSize.BOOL,
+                size=PlcBlockByteSize.BOOL,
                 data_type=PlcBlockDataType.BOOL,
-                command=PlcBlockCommand.LEARN_MODE_ON,
+                command=PlcBlockCommand.LEARN_MODE,
             ),
             PlcBlockCreate(
                 desc="Check template for item exists",
@@ -108,9 +104,9 @@ async def seed_plc_blocks() -> None:
                 offset_bit=2,
                 db_num=db_num,
                 mode=PlcBlockMode.WRITE,
-                size=PlcBlockDataTypeSize.BOOL,
+                size=PlcBlockByteSize.BOOL,
                 data_type=PlcBlockDataType.BOOL,
-                command=PlcBlockCommand.TEMPLATE_EXIST,
+                command=PlcBlockCommand.MODEL_EXIST,
             ),
             PlcBlockCreate(
                 desc="Set result correct / wrong",
@@ -118,9 +114,9 @@ async def seed_plc_blocks() -> None:
                 offset_bit=0,
                 db_num=db_num,
                 mode=PlcBlockMode.WRITE,
-                size=PlcBlockDataTypeSize.BOOL,
+                size=PlcBlockByteSize.BOOL,
                 data_type=PlcBlockDataType.BOOL,
-                command=PlcBlockCommand.RESULT_SET,
+                command=PlcBlockCommand.RESULT,
             ),
             PlcBlockCreate(
                 desc="Data processing is done",
@@ -128,9 +124,9 @@ async def seed_plc_blocks() -> None:
                 offset_bit=0,
                 db_num=db_num,
                 mode=PlcBlockMode.WRITE,
-                size=PlcBlockDataTypeSize.BOOL,
+                size=PlcBlockByteSize.BOOL,
                 data_type=PlcBlockDataType.BOOL,
-                command=PlcBlockCommand.PROC_DONE_SET,
+                command=PlcBlockCommand.PROCESSING_DONE,
             ),
         ]
 

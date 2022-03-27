@@ -1,5 +1,4 @@
 from app.models.plc import Plc, PlcCreate
-
 from sqlalchemy.ext.asyncio import AsyncSession
 
 

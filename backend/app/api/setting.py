@@ -12,32 +12,30 @@ router = APIRouter()
 
 # TODO: ADD Detail Messages
 @router.post("/settings", response_model=Setting)
-async def settings_add(
-    data: SettingCreate, session: AsyncSession = Depends(get_session)
-):
+async def post(data: SettingCreate, session: AsyncSession = Depends(get_session)):
     return await CRUDSetting.add(session=session, data=data)
 
 
 @router.get("/settings/{id}", response_model=Setting)
-async def settings_get(id: int, session: AsyncSession = Depends(get_session)):
-    data = await CRUDSetting.get(session=session)
+async def get(id: int, session: AsyncSession = Depends(get_session)):
+    data = await CRUDSetting.get(session=session, id=id)
 
     if not data:
-        raise HTTPException(status_code=404, detail="PLC not found")
+        raise HTTPException(status_code=404, detail="Setting not found")
 
     return data
 
 
 @router.delete("/settings/{id}", response_model=Setting)
-async def settings_delete(id: int, session: AsyncSession = Depends(get_session)):
-    data = await CRUDSetting.get(session=session)
+async def delete(id: int, session: AsyncSession = Depends(get_session)):
+    data = await CRUDSetting.get(session=session, id=id)
 
     if not data:
-        raise HTTPException(status_code=404, detail="PLC not found")
+        raise HTTPException(status_code=404, detail="Setting not found")
 
     return await CRUDSetting.delete(session=session, data=data)
 
 
 @router.get("/settings", response_model=List[Setting])
-async def settings_get_all(session: AsyncSession = Depends(get_session)):
+async def get_all(session: AsyncSession = Depends(get_session)):
     return await CRUDSetting.get_all(session=session)

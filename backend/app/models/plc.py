@@ -1,24 +1,32 @@
-from typing import List
+from typing import TYPE_CHECKING, List, Optional
 from sqlmodel import Relationship, SQLModel, Field
+
+if TYPE_CHECKING:
+    from app.models.plc_block import PlcBlock
 
 
 class PlcBase(SQLModel):
-    ip: str = "0.0.0.0"
-    rack: int = 0
-    slot: int = 0
+    ip: Optional[str] = Field(default=None)
+    rack: Optional[int] = Field(default=None)
+    slot: Optional[int] = Field(default=None)
 
 
 class Plc(PlcBase, table=True):
-    id: int = Field(default=None, primary_key=True)
+    id: Optional[int] = Field(default=None, primary_key=True)
+    blocks: List["PlcBlock"] = Relationship(back_populates="plc")
 
 
 class PlcCreate(PlcBase):
     pass
 
 
+class PlcRead(PlcBase):
+    id: int
+
+
 class PlcUpdate(PlcBase):
-    pass
+    id: int
 
 
 class PlcDelete(PlcBase):
-    pass
+    id: int

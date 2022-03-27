@@ -1,6 +1,6 @@
 from typing import List
 
-from sqlalchemy.future import select
+from sqlmodel import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.plc_block import PlcBlock, PlcBlockCreate

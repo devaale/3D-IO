@@ -18,7 +18,7 @@ class PlcBlockDataType(str, AutoNameEnum):
     DATE_TIME = auto()
 
 
-class PlcBlockDataTypeSize:
+class PlcBlockByteSize:
     BOOL = 1
     BYTE = 1
     WORD = 2
@@ -40,12 +40,13 @@ class PlcBlockMode(str, AutoNameEnum):
 
 
 class PlcBlockCommand(str, AutoNameEnum):
-    PRODUCT_GET = auto()
-    TRIGGER_CAM = auto()
-    LEARN_MODE_ON = auto()
+    PRODUCT = auto()
 
-    RESULT_SET = auto()
-    PROC_DONE_SET = auto()
+    TRIGGER = auto()
+    LEARN_MODE = auto()
 
-    CONN_EXIST = auto()
-    TEMPLATE_EXIST = auto()
+    RESULT = auto()
+    PROCESSING_DONE = auto()
+
+    CONNECTED = auto()
+    MODEL_EXIST = auto()

@@ -10,16 +10,14 @@ from app.models.plc_block import PlcBlock, PlcBlockCreate
 
 router = APIRouter()
 
-# TODO: Check correctness of the API's
+
 @router.post("/plc-blocks", response_model=PlcBlock)
-async def plc_blocks_add(
-    data: PlcBlockCreate, session: AsyncSession = Depends(get_session)
-):
+async def post(data: PlcBlockCreate, session: AsyncSession = Depends(get_session)):
     return await CRUDPlcBlock.add(session=session, data=data)
 
 
 @router.get("/plc-blocks/{id}", response_model=PlcBlock)
-async def plc_blocks_get(id: int, session: AsyncSession = Depends(get_session)):
+async def get(id: int, session: AsyncSession = Depends(get_session)):
     data = await CRUDPlcBlock.get(session=session, id=id)
 
     if not data:
@@ -29,7 +27,7 @@ async def plc_blocks_get(id: int, session: AsyncSession = Depends(get_session)):
 
 
 @router.delete("/plc-blocks/{id}", response_model=PlcBlock)
-async def plc_blocks_delete(id: int, session: AsyncSession = Depends(get_session)):
+async def delete(id: int, session: AsyncSession = Depends(get_session)):
     data = await CRUDPlcBlock.get(session=session, id=id)
 
     if not data:
@@ -39,5 +37,5 @@ async def plc_blocks_delete(id: int, session: AsyncSession = Depends(get_session
 
 
 @router.get("/plc-blocks", response_model=List[PlcBlock])
-async def plc_blocks_get_all(session: AsyncSession = Depends(get_session)):
+async def get_all(session: AsyncSession = Depends(get_session)):
     return await CRUDPlcBlock.get_all(session=session)

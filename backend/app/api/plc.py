@@ -10,7 +10,7 @@ router = APIRouter()
 
 # TODO: ADD Detail Messages
 @router.post("/plcs", response_model=Plc)
-async def plcs_add(data: PlcCreate, session: AsyncSession = Depends(get_session)):
+async def post(data: PlcCreate, session: AsyncSession = Depends(get_session)):
     exists = await CRUDPlc.exists(session=session)
 
     if exists:
@@ -20,7 +20,7 @@ async def plcs_add(data: PlcCreate, session: AsyncSession = Depends(get_session)
 
 
 @router.get("/plcs/{id}", response_model=Plc)
-async def plcs_get(id: int, session: AsyncSession = Depends(get_session)):
+async def get(id: int, session: AsyncSession = Depends(get_session)):
     data = await CRUDPlc.get(session=session)
 
     if not data:
@@ -30,7 +30,7 @@ async def plcs_get(id: int, session: AsyncSession = Depends(get_session)):
 
 
 @router.delete("/plcs/{id}", response_model=Plc)
-async def plcs_delete(id: int, session: AsyncSession = Depends(get_session)):
+async def delete(id: int, session: AsyncSession = Depends(get_session)):
     data = await CRUDPlc.get(session=session)
 
     if not data:
