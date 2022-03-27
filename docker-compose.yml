@@ -23,6 +23,6 @@ services:
     volumes:
       - ./frontend:/usr/src/app
     ports:
-      - 4000:4000
+      - 3000:3000
     environment:
       - NODE_ENV=development

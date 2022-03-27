@@ -2,8 +2,9 @@ from sqlmodel import SQLModel, Field
 
 from app.enums.setting import MeasurementType, SettingType
 
+
 class SettingBase(SQLModel):
-    label: str = 'default'
+    label: str = "default"
     value: float = 5
     min_value: float = 0
     max_value: float = 10
@@ -19,8 +20,10 @@ class Setting(SettingBase, table=True):
 class SettingUpdate(SettingBase):
     pass
 
+
 class SettingCreate(SettingBase):
     pass
+
 
 class SettingDelete(SettingBase):
     id: int

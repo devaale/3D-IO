@@ -1,10 +1,10 @@
-import uvicorn
 import socketio
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.db import init_db
+from app.database.seeder import seed_db
+from app.database.session import connect_db, disconnect_db
 
 from app.api import setting, plc, plc_block
 from app.core.config import Settings
@@ -23,13 +23,14 @@ sio_app = socketio.ASGIApp(sio)
 
 @app.on_event("startup")
 async def on_startup():
-    await init_db()
+    await connect_db()
+    await seed_db()
 
 
 @app.on_event("shutdown")
 async def shutdown():
-    pass
-    
+    await disconnect_db()
+
 
 @sio.event
 async def connect(sid, environ):
@@ -40,11 +41,13 @@ async def connect(sid, environ):
 async def disconnect(sid):
     print("Disconnected...")
 
-#TODO: Find a way to parse event data to an object
+
+# TODO: Find a way to parse event data to an object
 @sio.event
 async def update_setting(sid, data):
     new_value = data["value"]
-    print(f'Updating setting: {new_value}')
+    print(f"Updating setting: {new_value}")
+
 
 app.add_middleware(
     CORSMiddleware,

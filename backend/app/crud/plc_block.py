@@ -1,31 +1,28 @@
 from typing import List
-from fastapi import HTTPException
 
-from sqlalchemy.future import select
+from sqlmodel import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.plc_block import PlcBlock, PlcBlockCreate
 
-class CRUDPlcBlock:
-    
-    async def get_all_by_plc(session: AsyncSession, plc_id: int) -> List[PlcBlock]:
-        query = select(PlcBlock).where(PlcBlock.plc_id == plc_id)
-        data = await session.execute(query)
-        return data.scalars().all()
-    
-    async def add(session: AsyncSession, setting: PlcBlockCreate) -> PlcBlock:
-        data = PlcBlock.from_orm(setting)
-        session.add(data)
-        await session.commit()
-        await session.refresh(data)
-        return data
-    
-    async def delete(session: AsyncSession, id: int) -> PlcBlock:
-        data = await session.get(PlcBlock, id)
 
-        if not data:
-            raise HTTPException(status_code=404, detail="Plc not found")
-        
-        await session.delete(data)
+class CRUDPlcBlock:
+    async def get(session: AsyncSession, id: int) -> PlcBlock:
+        return await session.get(PlcBlock, id)
+
+    async def get_all(session: AsyncSession) -> List[PlcBlock]:
+        query = select(PlcBlock)
+        result = await session.execute(query)
+        return result.scalars().all()
+
+    async def add(session: AsyncSession, data: PlcBlockCreate) -> PlcBlock:
+        entity = PlcBlock.from_orm(data)
+        session.add(entity)
         await session.commit()
-        return data
+        await session.refresh(entity)
+        return entity
+
+    async def delete(session: AsyncSession, data: PlcBlock) -> PlcBlock:
+        entity = await session.delete(data)
+        await session.commit()
+        return entity
