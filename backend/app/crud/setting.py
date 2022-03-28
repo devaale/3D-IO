@@ -1,6 +1,6 @@
 from typing import List
 
-from sqlmodel import select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.setting import Setting, SettingCreate
@@ -16,16 +16,16 @@ class CRUDSetting:
         return result.scalars().all()
 
     async def add(session: AsyncSession, data: SettingCreate) -> Setting:
-        entity = Setting.from_orm(data)
-        session.add(entity)
+        obj = Setting.from_orm(data)
+        session.add(obj)
         await session.commit()
-        await session.refresh(entity)
-        return entity
+        await session.refresh(obj)
+        return obj
 
     async def delete(session: AsyncSession, data: Setting) -> Setting:
-        entity = await session.delete(data)
+        obj = await session.delete(data)
         await session.commit()
-        return entity
+        return obj
 
     async def exists(session: AsyncSession, id: int = 1) -> bool:
         return await session.get(Setting, id) is not None

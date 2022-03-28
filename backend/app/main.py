@@ -6,8 +6,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.database.seeder import seed_db
 from app.database.session import connect_db, disconnect_db
 
-from app.api import setting, plc, plc_block
 from app.core.config import Settings
+from app.crud.setting import CRUDSetting
+from app.api.v1.router import router
 
 settings = Settings()
 
@@ -42,7 +43,6 @@ async def disconnect(sid):
     print("Disconnected...")
 
 
-# TODO: Find a way to parse event data to an object
 @sio.event
 async def update_setting(sid, data):
     new_value = data["value"]
@@ -57,8 +57,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(setting.router)
-app.include_router(plc.router)
-app.include_router(plc_block.router)
+app.include_router(router)
 
 app.mount(settings.SOCKET_MOUNT, sio_app)

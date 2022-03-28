@@ -4,6 +4,7 @@ from app.crud.plc import CRUDPlc
 from app.models.plc import PlcCreate
 
 from app.crud.plc_block import CRUDPlcBlock
+from app.crud.setting import CRUDSetting
 from app.enums.plc_block import (
     PlcBlockMode,
     PlcBlockCommand,
@@ -11,17 +12,32 @@ from app.enums.plc_block import (
     PlcBlockByteSize,
 )
 from app.models.plc_block import PlcBlockCreate
+from app.models.setting import SettingCreate
+from app.database.session import ScopedSession
 
 
 async def seed_db() -> None:
     await seed_plc()
     await seed_plc_blocks()
+    await seed_settings()
+    async with ScopedSession() as session:
+        data = await CRUDSetting.get_all(session)
+        for x in data:
+            print(x)
 
 
 async def seed_plc() -> None:
     async with ScopedSession() as session:
         plc = PlcCreate()
         _ = await CRUDPlc.add(session=session, data=plc)
+
+
+async def seed_settings() -> None:
+    async with ScopedSession() as session:
+        settings = [SettingCreate(), SettingCreate(), SettingCreate()]
+
+        for setting in settings:
+            _ = await CRUDSetting.add(session, setting)
 
 
 async def seed_plc_blocks() -> None:

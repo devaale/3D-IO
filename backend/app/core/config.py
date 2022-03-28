@@ -15,4 +15,5 @@ class Settings(BaseSettings):
     ASGI_PROTOCOL: str = "main:app"
     ASGI_RELOAD: bool = False
     CORS_ALLOWED_ORIGINS: List[str] = []
-    ORIGINS: List[str] = ["http://localhost:3000"]
+    ORIGINS: List[str] = ["http://localhost:3001"]
+    API_V1_STR: str = "/api/v1"

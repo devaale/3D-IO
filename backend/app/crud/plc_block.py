@@ -16,13 +16,13 @@ class CRUDPlcBlock:
         return result.scalars().all()
 
     async def add(session: AsyncSession, data: PlcBlockCreate) -> PlcBlock:
-        entity = PlcBlock.from_orm(data)
-        session.add(entity)
+        obj = PlcBlock.from_orm(data)
+        session.add(obj)
         await session.commit()
-        await session.refresh(entity)
-        return entity
+        await session.refresh(obj)
+        return obj
 
     async def delete(session: AsyncSession, data: PlcBlock) -> PlcBlock:
-        entity = await session.delete(data)
+        obj = await session.delete(data)
         await session.commit()
-        return entity
+        return obj

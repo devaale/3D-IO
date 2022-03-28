@@ -7,16 +7,16 @@ class CRUDPlc:
         return await session.get(Plc, id)
 
     async def add(session: AsyncSession, data: PlcCreate) -> Plc:
-        entity = Plc.from_orm(data)
-        session.add(entity)
+        obj = Plc.from_orm(data)
+        session.add(obj)
         await session.commit()
-        await session.refresh(entity)
-        return entity
+        await session.refresh(obj)
+        return obj
 
     async def delete(session: AsyncSession, data: Plc) -> Plc:
-        entity = await session.delete(data)
+        obj = await session.delete(data)
         await session.commit()
-        return entity
+        return obj
 
     async def exists(session: AsyncSession, id: int = 1) -> bool:
         return await session.get(Plc, id) is not None
