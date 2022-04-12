@@ -1,4 +1,5 @@
 module.exports = {
+  TRIGGER: "trigger",
   CONNECT: "connect",
   DISCONNECT: "disconnect",
 
