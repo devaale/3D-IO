@@ -2,8 +2,6 @@ import snap7
 from typing import Any
 from threading import Lock
 
-from sqlalchemy import false
-
 
 class PlcReader:
     def __init__(self, ip: str, rack: int, slot: int):

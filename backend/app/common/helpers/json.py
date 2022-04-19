@@ -1,6 +1,6 @@
 import json
 from typing import Dict
-from app.errors.file import FileReadError, FileWriteError
+from app.common.errors.file import FileReadError
 
 
 def read_json_string(path: str) -> str:

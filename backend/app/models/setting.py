@@ -1,16 +1,15 @@
 from sqlmodel import SQLModel, Field
-
-from app.enums.setting import MeasurementType, SettingType
+from app.enums.setting import MeasurementType
 
 
 class SettingBase(SQLModel):
-    label: str = "default"
+    key: str = ""
+    description: str = ""
     value: float = 5
     min_value: float = 0
     max_value: float = 10
     step: float = 1
-    type: SettingType = SettingType.PROCESSING_GENERAL.value
-    measurement: MeasurementType = MeasurementType.MILLIMETERS.value
+    measurement: MeasurementType = MeasurementType.MILLIMETERS
 
 
 class Setting(SettingBase, table=True):

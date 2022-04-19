@@ -1,154 +1,91 @@
-import time
-from threading import Event
+import asyncio
+from asyncio import Event
 
 from typing import *
 
-from app.errors.camera import CameraError
+from app.common.errors.camera import CameraError
 from app.hardware.camera.reader import CameraReader
-from app.services.processing import ProcessingService
-
-# from desktop_app.services.visualization.depth import Visualizer3D
-# from desktop_app.services.visualization.rgb import VisualizerRGB
-# from desktop_app.services.visualization.result import VisualizerResult
+from app.services.visualization import Visualizer
+from app.services.detection import DetectionService
+from app.processing.pipeline import ProcessingPipeline
 
 
 class CameraService:
     SAMPLE_COUNT = 5
 
     def __init__(self):
-        self._results = dict()
-        self._results_db = list()
-
-        # self._settings = SettingsProxy()
-
         self._trigger = Event()
+        self._visualizer = Visualizer()
 
-        self._proc_service = ProcessingService()
+        self._detection_service = DetectionService()
+        self._processing_pipeline = ProcessingPipeline()
+
         self._camera_reader = CameraReader(848, 480, 30, "823112061406")
-        # self._visualizer3D = Visualizer3D()
-        # self._visualizerRGB = VisualizerRGB()
-        # self._visualizer_result = VisualizerResult()
 
-    def set_manual_reference(self):
-        self._proc_service.detect = False
+    async def set_manual_reference(self):
         self._trigger.set()
 
-    def set_manual_detect(self):
-        self._proc_service.detect = True
+    async def set_manual_detect(self):
         self._trigger.set()
 
-    def connect(self):
+    async def connect(self):
         try:
-            return self._camera_reader.connect()
+            return await self._camera_reader.connect()
         except CameraError as error:
             print(error)
 
-    def disconnect(self):
+    async def disconnect(self):
         try:
-            return not self._camera_reader.disconnect()
+            return not await self._camera_reader.disconnect()
         except CameraError as error:
             print(error)
 
-    def connected(self) -> bool:
-        try:
-            return self._camera_reader.connected()
-        except CameraError as error:
-            print(error)
+    async def run(self):
+        await self.connect()
 
-    def run(self):
-        self.connect()
+        self._visualizer.create_window()
 
         try:
             while True:
                 if self._trigger.is_set():
-
-                    # TODO: Get sample count from database
                     depth_frames = []
-                    color_frames = []
 
                     try:
-                        depth_frames, color_frames = self._camera_reader.read(
+                        depth_frames, _ = await self._camera_reader.read(
                             self.SAMPLE_COUNT
                         )
                     except CameraError as error:
                         print(error)
                         continue
 
-                    self._proc_service.process(
-                        depth_frames, self._camera_reader.intrinsics()
+                    intrinsics = await self._camera_reader.intrinsics()
+
+                    clusters = await self._processing_pipeline.process(
+                        depth_frames, intrinsics
                     )
 
-                    # self.__save_results()
-                    # self._visualizer_result.update(self._results)
-                    # self.__clear_results()
+                    cloud, results = await self._detection_service.detect(clusters)
+
                     self._trigger.clear()
 
-                time.sleep(0.001)
+                await self.visualize()
+
+                await asyncio.sleep(0.001)
         finally:
-            self.disconnect()
+            await self.disconnect()
 
-    # def _visualize(self):
-    #     depth_frames, color_frames = self._camera_reader.read(1)
-    #     results_cloud = self.__run_detection(depth_frames)
-    #     self._visualizer3D.render(utils.sum_points_colors_to_cloud(results_cloud))
-    #     self._visualizerRGB.render(color_frames[0])
+    async def visualize(self):
+        depth_frames, color_frames = await self._camera_reader.read(1)
 
-    # @timing
-    # def __camera_post_processing(
-    #     self, depth_frames: List[rs.depth_frame]
-    # ) -> List[rs.depth_frame]:
-    #     frames = []
+        intrinsics = await self._camera_reader.intrinsics()
 
-    #     for depth_frame in depth_frames:
-    #         frame = Camera.apply_threshold_filter(
-    #             depth_frame,
-    #             self._settings.get("depth_from"),
-    #             self._settings.get("depth_to"),
-    #         )
-    #         frame = Camera.apply_temporal_filter(frame)
-    #         frames.append(frame)
+        clusters = await self._processing_pipeline.process(depth_frames, intrinsics)
 
-    #     return frames
+        cloud, _ = await self._detection_service.detect(clusters)
 
-    # def __run_detection(self, depth_frames: List[rs.depth_frame]):
-    #     logger.info(
-    #         "[Camera Service] Running clustering processing strategy. Detecting."
-    #     )
-    #     frames = self.__camera_post_processing(depth_frames)
-    #     results_cloud = clustering_detection.detect(
-    #         frames[0],
-    #         frames,
-    #         0,
-    #         self._camera_reader.intrinsics(),
-    #         self._settings,
-    #         self._references,
-    #         self.__selected_product,
-    #         self._results,
-    #         self._results_db,
-    #         self.DETECTION_RESULT_FOLDER,
-    #     )
+        self._visualizer.visualize_cloud(cloud)
 
-    #     return results_cloud
+        self._visualizer.visualize_color_frame(color_frames[0])
 
-    # def __run_reference_creation(self, depth_frames: List[rs.depth_frame]):
-    #     logger.info(
-    #         "[Camera Service] Running clustering processing strategy. Creating Reference."
-    #     )
-    #     frames = self.__camera_post_processing(depth_frames)
-
-    #     results_cloud = clustering_reference_creation.create(
-    #         frames[0],
-    #         frames,
-    #         0,
-    #         self._camera_reader.intrinsics(),
-    #         self._settings,
-    #         self.__selected_product,
-    #         self._results,
-    #         self._results_db,
-    #         self.REFERENCE_RESULT_FOLDER,
-    #     )
-
-    #     return results_cloud
-
-    def stop(self):
+    async def stop(self):
         self._camera_reader.disconnect()

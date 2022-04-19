@@ -1,32 +1,32 @@
 from typing import List
 from sqlmodel import select
-from app.models.plc_block import PlcBlock, PlcBlockCreate
+from app.models.position import PositionModel, PositionModelCreate
 from app.database.session import ScopedSession
 
 
-class CRUDPlcBlock:
+class PositionModelCRUD:
     def __init__(self) -> None:
         pass
 
-    async def get(self, id: int) -> PlcBlock:
+    async def get(self, id: int) -> PositionModel:
         async with ScopedSession() as session:
-            return await session.get(PlcBlock, id)
+            return await session.get(PositionModel, id)
 
-    async def get_all(self) -> List[PlcBlock]:
+    async def get_all(self) -> List[PositionModel]:
         async with ScopedSession() as session:
-            query = select(PlcBlock)
+            query = select(PositionModel)
             result = await session.execute(query)
             return result.scalars().all()
 
-    async def add(self, data: PlcBlockCreate) -> PlcBlock:
+    async def add(self, data: PositionModelCreate) -> PositionModel:
         async with ScopedSession() as session:
-            obj = PlcBlock.from_orm(data)
+            obj = PositionModel.from_orm(data)
             session.add(obj)
             await session.commit()
             await session.refresh(obj)
             return obj
 
-    async def delete(self, data: PlcBlock) -> PlcBlock:
+    async def delete(self, data: PositionModel) -> PositionModel:
         async with ScopedSession() as session:
             obj = await session.delete(data)
             await session.commit()

@@ -5,11 +5,14 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database.seeder import seed_db
-from app.database.session import connect_db, disconnect_db
+from app.database.session import connect_db, disconnect_db, ScopedSession
 
-from app.core.config import Settings
+from app.crud.setting import CRUDSetting
+
+from app.common.config import Settings
 from app.api.v1.router import router
-from threading import Thread
+
+from app.manager import ServiceManager
 from app.services.camera import CameraService
 
 settings = Settings()
@@ -24,18 +27,13 @@ sio = socketio.AsyncServer(
 sio_app = socketio.ASGIApp(sio)
 
 camera_service = CameraService()
-camera_service_thread = None
+manager = ServiceManager(camera_service)
 
 
 @app.on_event("startup")
 async def on_startup():
     await connect_db()
     await seed_db()
-    global camera_service, camera_service_thread
-    if camera_service_thread is None:
-        camera_service_thread = Thread(target=camera_service.run)
-        camera_service_thread.setDaemon(True)
-        camera_service_thread.start()
 
 
 @app.on_event("shutdown")
@@ -55,15 +53,21 @@ async def disconnect(sid):
 
 @sio.event
 async def update_setting(sid, data):
-    new_value = data["value"]
-    print(f"Updating setting: {new_value}")
+    async with ScopedSession() as session:
+        await CRUDSetting.update_value(
+            session, id=int(data["id"]), value=float(data["value"])
+        )
+        print(f"Updating setting: {int(data['id'])}")
 
 
 @sio.event
 async def trigger(sid, data):
-    print(f"TRIGGER")
-    global camera_service
-    camera_service.set_manual_detect()
+    await manager.camera_detect()
+
+
+@sio.event
+async def camera_start(sid, data):
+    await manager.camera_start()
 
 
 app.add_middleware(

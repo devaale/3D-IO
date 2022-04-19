@@ -1,17 +1,17 @@
-from threading import Thread
+import asyncio
 from app.services.camera import CameraService
 
 
-class Manager:
-    def __init__(self) -> None:
-        self._thread = None
-        self._service: CameraService = CameraService()
+class ServiceManager:
+    def __init__(self, camera_service: CameraService) -> None:
+        self._created = False
+        self._camera_task = None
+        self._camera_service = camera_service
 
-    def start_service(self):
-        if self._thread is None:
-            self._thread = Thread(target=self._service.run)
-            self._thread.setDaemon(True)
-            self._thread.start()
+    async def camera_start(self):
+        if not self._created:
+            self._camera_task = asyncio.create_task(self._camera_service.run())
+            self._created = True
 
-    def trigger_service(self):
-        self._service.set_manual_detect()
+    async def camera_detect(self):
+        await self._camera_service.set_manual_detect()

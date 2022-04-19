@@ -23,7 +23,7 @@ const SettingItem = ({ setting }) => {
 
   return (
     <Grid key={setting.id} item xs={12} md={6}>
-      <Typography gutterBottom>{setting.label}</Typography>
+      <Typography gutterBottom>{setting.description}</Typography>
       <Slider
         value={value}
         onChange={handleSliderChange}

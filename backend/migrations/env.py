@@ -4,13 +4,22 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import AsyncEngine
-from sqlmodel import SQLModel                       # NEW
+from sqlmodel import SQLModel  # NEW
 
 from alembic import context
 
 from app.models.setting import Setting
 from app.models.plc import Plc
 from app.models.plc_block import PlcBlock
+from app.models.product import Product
+from app.models.position import PositionModel
+from app.models.region import RegionModel
+from app.models.result import Result
+
+# from app.models.region_result import RegionDetectionResult
+
+# from app.models.position import PositionModel
+# from app.models.region import RegionModel
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -24,7 +33,7 @@ fileConfig(config.config_file_name)
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = SQLModel.metadata             # UPDATED
+target_metadata = SQLModel.metadata  # UPDATED
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
