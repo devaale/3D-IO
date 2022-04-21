@@ -10,8 +10,8 @@ from app.processing.algorithms.clustering.base import ClusteringAlgorithm
 from app.processing.pipelines.base import ProcessingPipeline
 
 class BasicProcessingPipeline(ProcessingPipeline):
-    def __init__(self, clustering_algorithm: ClusteringAlgorithm, plane_segmentation_algorithm: PlaneSegmentationAlgorithm):
-        self._settings = SettingsService()
+    def __init__(self, settings_service: SettingsService, clustering_algorithm: ClusteringAlgorithm, plane_segmentation_algorithm: PlaneSegmentationAlgorithm):
+        self._settings = settings_service
         self._clustering_algorithm = clustering_algorithm
         self._plane_segmentation_algorithm = plane_segmentation_algorithm
 

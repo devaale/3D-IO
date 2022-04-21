@@ -5,6 +5,7 @@ from app.enums.product import ClusteringAlgorithm, PlaneSegmentationAlgorithm
 from app.enums.product import ProcessingCommand, ProcessingCommand
 
 if TYPE_CHECKING:
+    from app.models.result import Result
     from app.models.position import PositionModel
 
 
@@ -24,6 +25,7 @@ class ProductBase(SQLModel):
 class Product(ProductBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     position_models: List["PositionModel"] = Relationship(back_populates="product")
+    position_results: List["Result"] = Relationship(back_populates="product")
 
 
 class ProductCreate(ProductBase):

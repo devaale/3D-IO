@@ -1,13 +1,18 @@
 from typing import Tuple
+from app.common.converters.millimeters import MillimetersConvertor
 
 
 class DepthValidator:
-    def __init__(self, threshold: float) -> Tuple[bool, float]:
-        self._threshold = threshold
+    def __init__(self) -> None:
+        pass
 
-    def validate(self, model_depth: float, detected_depth: float) -> bool:
+    def validate(
+        self, model_depth: float, detected_depth: float, threshold: float
+    ) -> bool:
         error = abs(model_depth - detected_depth)
 
-        valid = True if error <= self._threshold else False
+        error_mm = MillimetersConvertor.from_meters(error)
 
-        return valid, error
+        valid = True if error <= threshold else False
+
+        return valid, error_mm

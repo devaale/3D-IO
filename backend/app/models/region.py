@@ -25,7 +25,7 @@ class RegionModelUpdate(RegionModelBase):
 
 
 class RegionModelCreate(RegionModelBase):
-    position_model_id: int
+    pass
 
 
 class RegionModelDelete(RegionModelBase):
@@ -33,4 +33,4 @@ class RegionModelDelete(RegionModelBase):
 
 
 class RegionDetected(RegionModelBase):
-    pass
+    position_model_id: Optional[int]

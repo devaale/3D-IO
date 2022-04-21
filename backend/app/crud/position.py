@@ -1,44 +1,59 @@
 from typing import List
 from sqlmodel import select
-from app.models.position import PositionModel, PositionModelCreate
-from app.database.session import ScopedSession
+from app.models.position import PositionModel
+from app.models.position import PositionDetected
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class PositionModelCRUD:
     def __init__(self) -> None:
         pass
 
-    async def get(self, id: int) -> PositionModel:
-        async with ScopedSession() as session:
-            return await session.get(PositionModel, id)
+    async def get(self, id: int, session: AsyncSession) -> PositionModel:
+        return await session.get(PositionModel, id)
 
-    async def get_all(self) -> List[PositionModel]:
-        async with ScopedSession() as session:
-            query = select(PositionModel)
-            result = await session.execute(query)
-            return result.scalars().all()
+    async def get_all(self, session: AsyncSession) -> List[PositionModel]:
+        query = select(PositionModel)
+        result = await session.execute(query)
+        return result.scalars().all()
 
-    async def add(self, data: PositionModelCreate) -> PositionModel:
-        async with ScopedSession() as session:
-            obj = PositionModel.from_orm(data)
-            session.add(obj)
-            await session.commit()
-            await session.refresh(obj)
-            return obj
+    async def add(self, data: PositionDetected, session: AsyncSession) -> PositionModel:
+        obj = PositionModel.from_orm(data)
+        session.add(obj)
+        await session.commit()
+        await session.refresh(obj)
+        return obj
 
-    async def delete(self, data: PositionModel) -> PositionModel:
-        async with ScopedSession() as session:
-            obj = await session.delete(data)
-            await session.commit()
-            return obj
+    async def delete(self, data: PositionModel, session: AsyncSession) -> PositionModel:
+        obj = await session.delete(data)
+        await session.commit()
+        return obj
 
-    async def find_by_position_and_product(self, row: int, col: int, product_id: int):
-        async with ScopedSession() as session:
-            query = select(PositionModel).where(
-                PositionModel.row == row
-                and PositionModel.col == col
-                and PositionModel.product_id == product_id
-            )
-            result = await session.execute(query)
+    async def find_by_position_and_product(
+        self, row: int, col: int, product_id: int, session: AsyncSession
+    ):
+        query = select(PositionModel).where(
+            PositionModel.row == row,
+            PositionModel.col == col,
+            PositionModel.product_id == product_id,
+        )
 
-            return result
+        results = await session.execute(query)
+
+        try:
+            return results.scalars().all()[0]
+        except Exception as error:
+            return None
+
+    async def update(self, data: PositionModel, session: AsyncSession) -> PositionModel:
+        obj = await session.get(PositionModel, data.id)
+
+        obj.plane_angle = data.plane_angle
+
+        session.add(obj)
+
+        await session.commit()
+
+        await session.refresh(obj)
+
+        return obj

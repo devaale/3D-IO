@@ -8,33 +8,69 @@ from app.common.models.camera_data import CameraData
 from app.services.detection import DetectionService
 from app.services.procesing import ProcessingService
 from app.services.product import CurrentProductService
+from app.common.interfaces.session_proxy import SessionProxy
+from app.services.settings import SettingsService
 from app.services.result import ResultService
+from app.crud.camera import CameraCRUD
 
 
 class CoreService:
-    def __init__(self) -> None:
+    def __init__(self, session: SessionProxy) -> None:
+        self._session_proxy = session
+        self._settings_service = None
+
+        self._camera = None
+        self._product_service = None
         self.camera_service = None
+        self.visualization_service = None
+
         self.detection_service = None
         self.processing_pipeline = None
-        self.visualization_service = None
-        self.result_service = None
-        self.product_service = CurrentProductService()
 
     async def configure(self):
-        camera_reader = CameraReaderFactory.create(
-            "REAL_SENSE", 848, 480, 30, "823112061406"
-        )
-        self.camera_service = CameraService(camera_reader)
+        self._settings_service = SettingsService(session_proxy=self._session_proxy)
+
+        self._product_service = CurrentProductService(session_proxy=self._session_proxy)
+
+        await self.configure_camera()
+
+        await self.configure_processing()
+
+        await self.configure_detection()
 
         self.visualization_service = VisualizationService()
 
-        self.detection_service = DetectionService()
+    async def configure_camera(self):
+        session_scoped = self._session_proxy.get()
 
+        async with session_scoped as session:
+            self._camera = await CameraCRUD().get(session=session)
+
+        camera_reader = CameraReaderFactory.create(
+            self._camera.camera_type,
+            self._camera.width,
+            self._camera.height,
+            self._camera.fps,
+            self._camera.serial_num,
+        )
+
+        self.camera_service = CameraService(camera_reader)
+
+    async def configure_processing(self):
         self.processing_service = ProcessingService()
 
-        current_product = await self.product_service.get_current()
+        current_product = await self._product_service.get_current()
 
-        await self.processing_service.configure(current_product)
+        await self.processing_service.configure(
+            SettingsService(session_proxy=self._session_proxy), current_product
+        )
+
+    async def configure_detection(self):
+        self.detection_service = DetectionService(
+            SettingsService(session_proxy=self._session_proxy),
+            CurrentProductService(session_proxy=self._session_proxy),
+            ResultService(self._session_proxy),
+        )
 
     async def start(self):
         await self.configure()

@@ -6,13 +6,14 @@ from app.common.converters.frames import FramesDataConverter
 from app.processing.factories.segmentation import (
     PlaneSegmentationAlgorithmFactory,
 )
+from app.services.settings import SettingsService
 
 
 class ProcessingService:
     def __init__(self) -> None:
         self._processing_pipeline = None
 
-    async def configure(self, product: Product):
+    async def configure(self, settings_service: SettingsService, product: Product):
         clustering_algorithm = ClusteringAlgorithmFactory.create(
             product.clustering_algorithm
         )
@@ -22,7 +23,7 @@ class ProcessingService:
         )
 
         self._processing_pipeline = BasicProcessingPipeline(
-            clustering_algorithm, plane_segmentation_algorithm
+            settings_service, clustering_algorithm, plane_segmentation_algorithm
         )
 
     async def process(self, camera_data: CameraData):

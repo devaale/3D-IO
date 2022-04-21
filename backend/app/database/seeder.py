@@ -20,7 +20,10 @@ from app.enums.product import (
     PlaneSegmentationAlgorithm,
     ProcessingCommand,
 )
+from app.database.session import ScopedSession
 from app.crud.product import ProductCRUD
+from app.crud.camera import CameraCRUD
+from app.models.camera import CameraCreate
 
 
 async def seed_db() -> None:
@@ -28,6 +31,14 @@ async def seed_db() -> None:
     await seed_plc()
     await seed_plc_blocks()
     await seed_settings()
+    await seed_camera()
+
+
+async def seed_camera() -> None:
+    camera = CameraCreate()
+
+    async with ScopedSession() as session:
+        _ = await CameraCRUD().add(camera, session)
 
 
 async def seed_products() -> None:
@@ -45,12 +56,14 @@ async def seed_products() -> None:
     ]
 
     for model in models:
-        _ = await ProductCRUD().create(model)
+        async with ScopedSession() as session:
+            _ = await ProductCRUD().create(model, session=session)
 
 
 async def seed_plc() -> None:
     plc = PlcCreate()
-    _ = await CRUDPlc().add(data=plc)
+    async with ScopedSession() as session:
+        _ = await CRUDPlc().add(data=plc, session=session)
 
 
 async def seed_settings() -> None:
@@ -148,7 +161,8 @@ async def seed_settings() -> None:
     ]
 
     for setting in settings:
-        _ = await CRUDSetting().add(data=setting)
+        async with ScopedSession() as session:
+            _ = await CRUDSetting().add(data=setting, session=session)
 
 
 async def seed_plc_blocks() -> None:
@@ -257,4 +271,5 @@ async def seed_plc_blocks() -> None:
     ]
 
     for block in blocks:
-        _ = await CRUDPlcBlock().add(data=block)
+        async with ScopedSession() as session:
+            _ = await CRUDPlcBlock().add(data=block, session=session)

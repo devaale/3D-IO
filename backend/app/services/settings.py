@@ -4,16 +4,21 @@ from typing import Any, List
 from app.models.setting import Setting
 from app.crud.setting import CRUDSetting
 from app.common.adapters.settings_value import SettingsValueAdapter
+from app.common.interfaces.session_proxy import SessionProxy
 
 
 class SettingsService:
-    def __init__(self) -> None:
+    def __init__(self, session_proxy: SessionProxy) -> None:
         self._lock = Lock()
+        self._session_proxy = session_proxy
         self._settings: List[Setting] = field(default_factory=list)
 
     async def load(self):
         async with self._lock:
-            self._settings = await CRUDSetting().get_all()
+            session_scoped = self._session_proxy.get()
+
+            async with session_scoped as session:
+                self._settings = await CRUDSetting().get_all(session=session)
 
     async def get(self, key: str) -> Any:
         async with self._lock:

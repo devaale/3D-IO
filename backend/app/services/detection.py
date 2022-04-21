@@ -13,11 +13,16 @@ from app.services.result import ResultService
 
 
 class DetectionService:
-    def __init__(self) -> None:
-        self._settings = SettingsService()
-        self._product = CurrentProductService()
+    def __init__(
+        self,
+        settings_service: SettingsService,
+        product_service: CurrentProductService,
+        result_service: ResultService,
+    ) -> None:
+        self._settings = settings_service
+        self._product = product_service
         self._region_extractor = RegionExtractor()
-        self._result_service = ResultService(None)
+        self._result_service = result_service
 
     async def detect(
         self, clusters: List[o3d.geometry.PointCloud]
@@ -31,7 +36,7 @@ class DetectionService:
 
             row, col = PositionConverter.to_cell_position(i, product.col_count)
 
-            detected_object = PositionDetected(row=row, col=col)
+            detected_object = PositionDetected(row=row, col=col, plane_angle=0)
 
             detected_object.regions = await self.detect_regions(cluster)
 

@@ -3,7 +3,7 @@ from sqlmodel import Relationship, SQLModel, Field
 
 
 if TYPE_CHECKING:
-    from app.models.position import PositionModel
+    from app.models.product import Product
 
 
 class ResultBase(SQLModel):
@@ -13,10 +13,8 @@ class ResultBase(SQLModel):
 
 class Result(ResultBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    position_model_id: Optional[int] = Field(
-        default=None, foreign_key="positionmodel.id"
-    )
-    position_model: Optional["PositionModel"] = Relationship(back_populates="results")
+    product_id: Optional[int] = Field(default=None, foreign_key="product.id")
+    product: Optional["Product"] = Relationship(back_populates="position_results")
 
 
 class ResultCreate(ResultBase):
