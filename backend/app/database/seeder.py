@@ -14,6 +14,7 @@ from app.enums.setting import MeasurementType
 from app.models.setting import SettingCreate
 from app.models.product import ProductCreate
 from app.models.result import ResultCreate
+from app.models.position import PositionModelCreate
 from app.enums.product import (
     ClusteringAlgorithm,
     PlaneSegmentationAlgorithm,

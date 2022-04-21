@@ -1,17 +1,17 @@
 import asyncio
-from app.services.camera import CameraService
+from app.services.core import CoreService
 
 
 class ServiceManager:
-    def __init__(self, camera_service: CameraService) -> None:
+    def __init__(self) -> None:
         self._created = False
-        self._camera_task = None
-        self._camera_service = camera_service
+        self._core_task = None
+        self._core_service = CoreService()
 
     async def camera_start(self):
         if not self._created:
-            self._camera_task = asyncio.create_task(self._camera_service.run())
+            self._core_task = asyncio.create_task(self._core_service.start())
             self._created = True
 
     async def camera_detect(self):
-        await self._camera_service.set_manual_detect()
+        await self._core_service.manual_detection()

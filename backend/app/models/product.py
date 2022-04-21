@@ -15,8 +15,10 @@ class ProductBase(SQLModel):
     current: bool = False
     created: bool = False
     command: ProcessingCommand = ProcessingCommand.TRAIN
-    clustering: ClusteringAlgorithm = ClusteringAlgorithm.DBSCAN
-    segmentation: PlaneSegmentationAlgorithm = PlaneSegmentationAlgorithm.RANSAC
+    clustering_algorithm: ClusteringAlgorithm = ClusteringAlgorithm.DBSCAN
+    segmentation_algorithm: PlaneSegmentationAlgorithm = (
+        PlaneSegmentationAlgorithm.RANSAC
+    )
 
 
 class Product(ProductBase, table=True):

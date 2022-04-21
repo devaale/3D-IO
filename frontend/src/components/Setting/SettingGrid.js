@@ -25,8 +25,8 @@ const SettingGrid = () => {
   }
 
   return (
-    <Container maxWidth="md">
-      <Grid container spacing={2} marginTop={10}>
+    <Container maxWidth="lg">
+      <Grid container spacing={4} marginTop={10}>
         {data &&
           data.map((setting) => (
             <SettingItem key={setting.id} setting={setting} />

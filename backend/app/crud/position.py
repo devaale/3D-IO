@@ -31,3 +31,14 @@ class PositionModelCRUD:
             obj = await session.delete(data)
             await session.commit()
             return obj
+
+    async def find_by_position_and_product(self, row: int, col: int, product_id: int):
+        async with ScopedSession() as session:
+            query = select(PositionModel).where(
+                PositionModel.row == row
+                and PositionModel.col == col
+                and PositionModel.product_id == product_id
+            )
+            result = await session.execute(query)
+
+            return result

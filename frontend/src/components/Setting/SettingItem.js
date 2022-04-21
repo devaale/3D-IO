@@ -1,6 +1,8 @@
 import Grid from "@mui/material/Grid";
 import Slider from "@mui/material/Slider";
 import Typography from "@mui/material/Typography";
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
 
 import { useContext, useState } from "react";
 
@@ -21,19 +23,24 @@ const SettingItem = ({ setting }) => {
     socket.emit(events.UPDATE_SETTING, { id: id, value: newValue });
   };
 
+
+
   return (
     <Grid key={setting.id} item xs={12} md={6}>
-      <Typography gutterBottom>{setting.description}</Typography>
-      <Slider
-        value={value}
-        onChange={handleSliderChange}
-        valueLabelDisplay="auto"
-        step={setting.step}
-        marks
-        min={setting.min_value}
-        max={setting.max_value}
-      />
-    </Grid>
+      <Card sx={{ display: 'flex' }}>
+        <CardContent sx={{ flex: '1 0 auto' }}>
+          <Typography mb={5}>{setting.description}</Typography>
+          <Slider
+            value={value}
+            onChange={handleSliderChange}
+            valueLabelDisplay="on"
+            step={setting.step}
+            min={setting.min_value}
+            max={setting.max_value}
+          />
+        </CardContent>
+      </Card>
+    </Grid >
   );
 };
 

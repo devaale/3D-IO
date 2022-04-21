@@ -1,7 +1,9 @@
 from typing import List
 from typing import TYPE_CHECKING, Optional
+from numpy import product
 from sqlmodel import Relationship, SQLModel, Field
 from app.models.region import RegionDetected
+from app.models.product import ProductCreate, ProductUpdate
 
 
 if TYPE_CHECKING:
@@ -25,7 +27,7 @@ class PositionModel(PositionModelBase, table=True):
 
 
 class PositionModelCreate(PositionModelBase):
-    model_id: int
+    product_id: int
 
 
 class PositionModelUpdate(PositionModelBase):

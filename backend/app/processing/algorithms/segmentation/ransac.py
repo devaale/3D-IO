@@ -1,19 +1,17 @@
 from typing import List, Tuple
 import open3d as o3d
-from app.services.settings import SettingsService
+from app.processing.algorithms.segmentation.base import PlaneSegmentationAlgorithm
 
 
-class PlaneSegmentationRANSAC:
+class PlaneSegmentationRANSAC(PlaneSegmentationAlgorithm):
     @classmethod
     async def execute(
-        cls, cloud: o3d.geometry.PointCloud, settings: SettingsService
+        cls,
+        cloud: o3d.geometry.PointCloud,
+        ransac_n: int,
+        iterations: int,
+        distance_threshold: float,
     ) -> List[Tuple[o3d.geometry.PointCloud, List[float]]]:
-        ransac_n = 3
-        iterations = 1000
-
-        voxel_size = await settings.get("voxel_size")
-
-        distance_threshold = 2 * voxel_size
 
         planes = []
 

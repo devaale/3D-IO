@@ -2,9 +2,10 @@ import open3d as o3d
 import cv2
 import pyrealsense2 as rs
 import numpy as np
+from typing import List
 
 
-class Visualizer:
+class VisualizationService:
     def __init__(self):
         self._source = o3d.geometry.PointCloud
 
@@ -18,7 +19,7 @@ class Visualizer:
 
         self._cloud_added = False
 
-    def create_window(self):
+    def start(self):
         if self._created:
             return
         self._created = True
@@ -74,21 +75,18 @@ class Visualizer:
     def is_closed(self) -> bool:
         return not self._visualiser.poll_events()
 
-    def destroy(self):
+    def stop(self):
         if not self._created:
             return
         self._created = False
         self._visualiser.destroy_window()
 
     def __del__(self):
-        self.destroy()
+        self.stop()
 
     @staticmethod
-    def visualize_color_frame(rgb_frame: rs.frame):
-        if rgb_frame is None:
-            return
-
-        color_image = np.asanyarray(rgb_frame.get_data())
+    def visualize_color_frame(color_data: List[float]):
+        color_image = np.asanyarray(color_data)
         cv2.namedWindow("RGB Camera", cv2.WINDOW_AUTOSIZE)
         cv2.imshow("RGB Camera", color_image)
         cv2.waitKey(1)

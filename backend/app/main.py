@@ -13,7 +13,6 @@ from app.common.config import Settings
 from app.api.v1.router import router
 
 from app.manager import ServiceManager
-from app.services.camera import CameraService
 
 settings = Settings()
 
@@ -26,8 +25,7 @@ sio = socketio.AsyncServer(
 
 sio_app = socketio.ASGIApp(sio)
 
-camera_service = CameraService()
-manager = ServiceManager(camera_service)
+manager = ServiceManager()
 
 
 @app.on_event("startup")
@@ -54,10 +52,7 @@ async def disconnect(sid):
 @sio.event
 async def update_setting(sid, data):
     async with ScopedSession() as session:
-        await CRUDSetting.update_value(
-            session, id=int(data["id"]), value=float(data["value"])
-        )
-        print(f"Updating setting: {int(data['id'])}")
+        await CRUDSetting.update_value(id=int(data["id"]), value=float(data["value"]))
 
 
 @sio.event

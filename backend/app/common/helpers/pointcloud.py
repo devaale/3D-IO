@@ -39,41 +39,19 @@ async def voxel_down_cloud(
     return cloud_down_sampled
 
 
-async def clusters_find(
-    cloud: o3d.geometry.PointCloud, cluster_min_points: int, eps: int
-):
-    labels = np.array(
-        cloud.cluster_dbscan(
-            min_points=cluster_min_points, eps=eps, print_progress=True
-        )
-    )
-
-    points_clusters = {}
-
-    for point, label in zip(cloud.points, labels):
-        if label != -1:
-            points_clusters[label] = points_clusters.get(label, [])
-            points_clusters[label].append(point)
-
-    return points_clusters
-
-
-async def clusters_filter(
-    points_clusters, min_pts_cluster: int
+def clusters_filter(
+    points_clusters, min_points_threshold: int
 ) -> List[o3d.geometry.PointCloud]:
-    clusters_clouds = []
+    filtered = []
 
     for _, points_cluster in points_clusters.items():
-        if len(points_cluster) > min_pts_cluster:
-            cluster_points = o3d.geometry.PointCloud(
-                o3d.utility.Vector3dVector(points_cluster)
-            )
-            clusters_clouds.append(cluster_points)
+        if len(points_cluster) > min_points_threshold:
+            filtered.append(points_cluster)
 
-    return clusters_clouds
+    return filtered
 
 
-async def clouds_get_max_pts(clusters_points) -> int:
+def clouds_find_max_points(clusters_points) -> int:
     try:
         result = len(max(clusters_points.values(), key=lambda x: len(x)))
     except ValueError:
@@ -114,20 +92,6 @@ async def clusters_to_cloud(
     return cloud
 
 
-async def clusters_get(
-    clusters_points, cluster_min_pts_precentage
-) -> List[o3d.geometry.PointCloud]:
-    clusters = []
-
-    max_pts_cluster = await clouds_get_max_pts(clusters_points)
-
-    min_pts_cluster = int(max_pts_cluster * cluster_min_pts_precentage)
-
-    clusters = await clusters_filter(clusters_points, min_pts_cluster)
-
-    return clusters
-
-
 async def sort_clusters_by_single_axis(
     clusters_clouds: List[o3d.geometry.PointCloud], axis: int = 0, reverse: bool = True
 ) -> List[o3d.geometry.PointCloud]:
@@ -166,33 +130,6 @@ async def colorize_clouds(clouds: List[o3d.geometry.PointCloud]):
             index += 1
         cloud.paint_uniform_color(COLORS[count])
         count += 1
-
-
-async def frames_to_cloud(
-    frames: List[rs.depth_frame], camera_intrinsics
-) -> o3d.geometry.PointCloud:
-    cloud = o3d.geometry.PointCloud()
-
-    for frame in frames:
-        cloud += await create_cloud_from_frame(frame, camera_intrinsics)
-
-    return cloud
-
-
-async def create_cloud_from_frame(
-    depth_frame: rs.depth_frame, camera_intrinsic: rs.intrinsics
-) -> o3d.geometry.PointCloud:
-    depth_array = np.asanyarray(depth_frame.get_data())
-
-    open3d_depth_image = o3d.geometry.Image(depth_array)
-
-    intrinsic = await __pinhole_camera_intrinsic(camera_intrinsic)
-
-    cloud = o3d.geometry.PointCloud.create_from_depth_image(
-        open3d_depth_image, intrinsic
-    )
-
-    return cloud
 
 
 async def rotate_cloud_correct_position(cloud: o3d.geometry.PointCloud):
@@ -241,29 +178,6 @@ async def filter_planes(planes):
     return planes[0][0], planes[1][0], planes[1][1]
 
 
-async def __pinhole_camera_intrinsic(
-    camera_intrinsic: rs.intrinsics,
-) -> o3d.camera.PinholeCameraIntrinsic:
-    return o3d.camera.PinholeCameraIntrinsic(
-        camera_intrinsic.width,
-        camera_intrinsic.height,
-        camera_intrinsic.fx,
-        camera_intrinsic.fy,
-        camera_intrinsic.ppx,
-        camera_intrinsic.ppy,
-    )
-
-
 async def __sort_planes_by_single_axis(cloud_with_model, axis: int = 2):
     depth = cloud_with_model[0].get_center()[axis]
     return depth
-
-
-async def __sort_clusters_by_single_axis(
-    clusters_clouds: List[o3d.geometry.PointCloud], axis: int = 0, reverse: bool = True
-) -> List[o3d.geometry.PointCloud]:
-    sorted_clusters = sorted(
-        clusters_clouds, key=lambda x: x.get_center()[axis], reverse=reverse
-    )
-
-    return sorted_clusters
