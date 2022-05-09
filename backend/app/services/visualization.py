@@ -86,7 +86,6 @@ class VisualizationService:
 
     @staticmethod
     def visualize_color_frame(color_data: List[float]):
-        color_image = np.asanyarray(color_data)
         cv2.namedWindow("RGB Camera", cv2.WINDOW_AUTOSIZE)
-        cv2.imshow("RGB Camera", color_image)
+        cv2.imshow("RGB Camera", color_data)
         cv2.waitKey(1)

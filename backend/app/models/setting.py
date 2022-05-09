@@ -13,6 +13,7 @@ class SettingBase(SQLModel):
 
 
 class Setting(SettingBase, table=True):
+    __table_args__ = {"extend_existing": True}
     id: int = Field(default=None, primary_key=True)
 
 

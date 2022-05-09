@@ -1,10 +1,11 @@
 from sqlmodel import SQLModel, Field
-from app.enums.camera import CameraType
+from app.enums.camera import CameraType, CameraModel
 from typing import Optional
 
 
 class CameraBase(SQLModel):
-    camera_type: str = CameraType.REAL_SENSE
+    type: str = CameraType.REAL_SENSE
+    model: str = CameraModel.D435
     width: int = 848
     height: int = 480
     fps: int = 30

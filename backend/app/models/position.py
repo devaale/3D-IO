@@ -17,6 +17,7 @@ class PositionModelBase(SQLModel):
 
 
 class PositionModel(PositionModelBase, table=True):
+    __table_args__ = {"extend_existing": True}
     id: Optional[int] = Field(default=None, primary_key=True)
     product_id: Optional[int] = Field(default=None, foreign_key="product.id")
     product: Optional["Product"] = Relationship(back_populates="position_models")

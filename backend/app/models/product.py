@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, Optional
 from sqlmodel import SQLModel, Relationship, Field
 from app.enums.product import ClusteringAlgorithm, PlaneSegmentationAlgorithm
 from app.enums.product import ProcessingCommand, ProcessingCommand
+from app.enums.product import ProductModel
 
 if TYPE_CHECKING:
     from app.models.result import Result
@@ -10,7 +11,7 @@ if TYPE_CHECKING:
 
 
 class ProductBase(SQLModel):
-    product: str = ""
+    model: str = ProductModel.TEST
     row_count: int = 1
     col_count: int = 1
     current: bool = False
@@ -23,6 +24,7 @@ class ProductBase(SQLModel):
 
 
 class Product(ProductBase, table=True):
+    __table_args__ = {"extend_existing": True}
     id: Optional[int] = Field(default=None, primary_key=True)
     position_models: List["PositionModel"] = Relationship(back_populates="product")
     position_results: List["Result"] = Relationship(back_populates="product")

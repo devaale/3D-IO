@@ -1,4 +1,4 @@
-from app.common.interfaces.session_proxy import SessionProxy
+from app.common.interfaces.database.session_proxy import SessionProxy
 from app.crud.position import PositionModelCRUD
 from app.crud.region import RegionModelCRUD
 

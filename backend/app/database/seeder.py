@@ -24,6 +24,7 @@ from app.database.session import ScopedSession
 from app.crud.product import ProductCRUD
 from app.crud.camera import CameraCRUD
 from app.models.camera import CameraCreate
+from app.enums.product import ProductModel
 
 
 async def seed_db() -> None:
@@ -44,7 +45,7 @@ async def seed_camera() -> None:
 async def seed_products() -> None:
     models = [
         ProductCreate(
-            product="TEST_0",
+            model=ProductModel.TEST,
             row_count=1,
             col_count=3,
             current=True,
@@ -69,8 +70,8 @@ async def seed_plc() -> None:
 async def seed_settings() -> None:
     settings = [
         SettingCreate(
-            key="accuracy",
-            description="Accuracy (mm)",
+            key="depth_accuracy",
+            description="Depth accuracy (mm)",
             value=1.4,
             min_value=1,
             max_value=5,
@@ -78,7 +79,7 @@ async def seed_settings() -> None:
             measurement=MeasurementType.MILLIMETERS,
         ),
         SettingCreate(
-            key="corner_size",
+            key="region_size",
             description="ROI size (%)",
             value=35,
             min_value=0,
@@ -87,35 +88,8 @@ async def seed_settings() -> None:
             measurement=MeasurementType.PRECENTAGE,
         ),
         SettingCreate(
-            key="distance_ground",
-            description="Distance to ground (mm)",
-            value=345,
-            min_value=200,
-            max_value=500,
-            step=1,
-            measurement=MeasurementType.MILLIMETERS,
-        ),
-        SettingCreate(
-            key="depth_from",
-            description="From depth (mm)",
-            value=270,
-            min_value=150,
-            max_value=500,
-            step=1,
-            measurement=MeasurementType.MILLIMETERS,
-        ),
-        SettingCreate(
-            key="depth_to",
-            description="To depth (mm)",
-            value=333,
-            min_value=150,
-            max_value=500,
-            step=1,
-            measurement=MeasurementType.MILLIMETERS,
-        ),
-        SettingCreate(
-            key="cluster_min_size_precentage",
-            description="Min cluster size (%)",
+            key="cluster_min_points_precentage",
+            description="Min cluster points (%)",
             value=65,
             min_value=0,
             max_value=100,

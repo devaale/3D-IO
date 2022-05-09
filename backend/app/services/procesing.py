@@ -1,36 +1,68 @@
 from app.models.product import Product
-from app.processing.factories.clustering import ClusteringAlgorithmFactory
-from app.processing.pipelines.pipeline import BasicProcessingPipeline
-from app.common.models.camera_data import CameraData
-from app.common.converters.frames import FramesDataConverter
-from app.processing.factories.segmentation import (
-    PlaneSegmentationAlgorithmFactory,
-)
+from app.common.interfaces.camera.output import CameraOutput
+from app.common.interfaces.processing.pipeline import ProcessingPipeline
+from app.common.interfaces.database.session_proxy import SessionProxy
 from app.services.settings import SettingsService
 
 
 class ProcessingService:
-    def __init__(self) -> None:
-        self._processing_pipeline = None
+    def __init__(
+        self,
+        session_proxy: SessionProxy,
+        processing_pipeline: ProcessingPipeline = None,
+    ) -> None:
+        self._session_proxy = session_proxy
+        self._settings_service = SettingsService(self._session_proxy)
+        self._processing_pipeline = processing_pipeline
 
-    async def configure(self, settings_service: SettingsService, product: Product):
-        clustering_algorithm = ClusteringAlgorithmFactory.create(
-            product.clustering_algorithm
+    async def configure(
+        self, product: Product, processing_pipeline: ProcessingPipeline
+    ):
+        self._processing_pipeline = processing_pipeline
+
+        self._processing_pipeline.set_algorithm(product.clustering_algorithm)
+
+        self._processing_pipeline.set_algorithm(product.segmentation_algorithm)
+
+    async def process(self, data: CameraOutput):
+        print("[PROCESSING] Starting.")
+
+        await self._settings_service.load()
+
+        voxel_size = await self._settings_service.get("voxel_size")
+
+        crop_x_precentage = await self._settings_service.get("crop_precentage_x")
+
+        crop_y_precentage = await self._settings_service.get("crop_precentage_y")
+
+        crop_z_precentage = await self._settings_service.get("crop_precentage_z")
+
+        eps = 3
+
+        iterations = 1000
+
+        cluster_min_points = 10
+
+        cluster_min_points_precentage = await self._settings_service.get(
+            "cluster_min_points_precentage"
         )
 
-        plane_segmentation_algorithm = PlaneSegmentationAlgorithmFactory.create(
-            product.segmentation_algorithm
+        row_count = 1
+
+        col_count = 3
+
+        clusters, ground_plane = self._processing_pipeline.process(
+            data,
+            voxel_size=voxel_size,
+            crop_x_precentage=crop_x_precentage,
+            crop_y_precentage=crop_y_precentage,
+            crop_z_precentage=crop_z_precentage,
+            eps=eps,
+            iterations=iterations,
+            cluster_min_points=cluster_min_points,
+            cluster_min_points_precentage=cluster_min_points_precentage,
+            row_count=row_count,
+            col_count=col_count,
         )
 
-        self._processing_pipeline = BasicProcessingPipeline(
-            settings_service, clustering_algorithm, plane_segmentation_algorithm
-        )
-
-    async def process(self, camera_data: CameraData):
-        cloud = FramesDataConverter.depth_data_to_cloud(
-            camera_data.depth_data, camera_data.intrinsics
-        )
-
-        clusters = await self._processing_pipeline.process(cloud)
-
-        return clusters
+        return clusters, ground_plane[1]

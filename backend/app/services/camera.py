@@ -1,13 +1,12 @@
 from typing import *
-from app.common.errors.camera import CameraError
-from app.hardware.camera.base import CameraReader
-from app.common.models.camera_data import CameraData
+from app.common.interfaces.camera.output import CameraOutput
+from app.common.interfaces.camera.reader import CameraReader
 
 
 class CameraService:
     SAMPLE_COUNT = 5
 
-    def __init__(self, camera_reader: CameraReader):
+    def __init__(self, camera_reader: CameraReader = None):
         self._camera_reader = camera_reader
 
     async def start(self):
@@ -16,20 +15,16 @@ class CameraService:
         except Exception as error:
             print(f"Camera connect error: {error}")
 
-    async def read(self) -> CameraData:
-        depth_frames = []
-        color_frames = []
+    async def configure(self, camera_reader: CameraReader):
+        self._camera_reader = camera_reader
 
+    async def read(self) -> CameraOutput:
         try:
-            depth_frames, color_frames = await self._camera_reader.read(
-                self.SAMPLE_COUNT
-            )
+            camera_data = await self._camera_reader.read(self.SAMPLE_COUNT)
         except Exception as error:
             print(f"Camera read error: {error}")
 
-        intrinsics = await self._camera_reader.intrinsics()
-
-        return CameraData(depth_frames, color_frames, intrinsics)
+        return camera_data
 
     async def stop(self):
         try:

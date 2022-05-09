@@ -1,7 +1,7 @@
 import open3d as o3d
 import numpy as np
 from typing import List
-from app.common.helpers import pointcloud
+from app.processing.utils import pointcloud
 from app.common.converters.pointcloud import PointCloudConverter
 from app.processing.algorithms.clustering.base import ClusteringAlgorithm
 

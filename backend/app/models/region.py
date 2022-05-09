@@ -13,6 +13,7 @@ class RegionModelBase(SQLModel):
 
 
 class RegionModel(RegionModelBase, table=True):
+    __table_args__ = {"extend_existing": True}
     id: int = Field(default=None, primary_key=True)
     position_model_id: Optional[int] = Field(
         default=None, foreign_key="positionmodel.id"

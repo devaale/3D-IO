@@ -3,8 +3,8 @@ from dataclasses import field
 from typing import Any, List
 from app.models.setting import Setting
 from app.crud.setting import CRUDSetting
-from app.common.adapters.settings_value import SettingsValueAdapter
-from app.common.interfaces.session_proxy import SessionProxy
+from app.common.adapters.settings import SettingsValueAdapter
+from app.common.interfaces.database.session_proxy import SessionProxy
 
 
 class SettingsService:

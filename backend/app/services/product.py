@@ -2,7 +2,7 @@ from app.models.product import Product
 from app.crud.product import ProductCRUD
 from asyncio import Lock
 
-from app.common.interfaces.session_proxy import SessionProxy
+from app.common.interfaces.database.session_proxy import SessionProxy
 
 
 class CurrentProductService:

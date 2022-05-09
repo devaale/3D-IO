@@ -2,6 +2,9 @@ from enum import auto
 from app.enums.base import AutoNameEnum
 
 
+class ProductModel(str, AutoNameEnum):
+    TEST = auto()
+    
 class ClusteringAlgorithm(str, AutoNameEnum):
     DBSCAN = auto()
     KMEANS = auto()

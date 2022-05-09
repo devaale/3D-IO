@@ -1,106 +1,124 @@
 import asyncio
-
+import numpy as np
 from app.services.camera import CameraService
 from app.services.visualization import VisualizationService
 
-from app.hardware.camera.factory import CameraReaderFactory
-from app.common.models.camera_data import CameraData
+from app.common.interfaces.camera.reader_factory import CameraReaderFactory
 from app.services.detection import DetectionService
 from app.services.procesing import ProcessingService
 from app.services.product import CurrentProductService
-from app.common.interfaces.session_proxy import SessionProxy
+from app.common.interfaces.database.session_proxy import SessionProxy
 from app.services.settings import SettingsService
 from app.services.result import ResultService
 from app.crud.camera import CameraCRUD
+from app.common.interfaces.processing.pipeline_factory import ProcessingPipelineFactory
 
 
 class CoreService:
-    def __init__(self, session: SessionProxy) -> None:
+    def __init__(
+        self,
+        session: SessionProxy,
+        camera_reader_factory: CameraReaderFactory,
+        processing_pipeline_factory: ProcessingPipelineFactory,
+    ) -> None:
         self._session_proxy = session
-        self._settings_service = None
 
         self._camera = None
-        self._product_service = None
-        self.camera_service = None
-        self.visualization_service = None
+        self._camera_reader_factory = camera_reader_factory
+        self._camera_service = CameraService()
 
-        self.detection_service = None
-        self.processing_pipeline = None
+        self._processing_pipeline_factory = processing_pipeline_factory
+        self._processing_service = ProcessingService(session_proxy=self._session_proxy)
 
-    async def configure(self):
         self._settings_service = SettingsService(session_proxy=self._session_proxy)
-
         self._product_service = CurrentProductService(session_proxy=self._session_proxy)
 
-        await self.configure_camera()
+        self._visualization_service = None
 
-        await self.configure_processing()
+        self._detection_service = None
 
-        await self.configure_detection()
+    async def configure(self):
+        await self.configure_camera_service()
+
+        await self.configure_processing_service()
+
+        await self.configure_detection_service()
 
         self.visualization_service = VisualizationService()
 
-    async def configure_camera(self):
+    async def configure_camera_service(self):
         session_scoped = self._session_proxy.get()
 
         async with session_scoped as session:
             self._camera = await CameraCRUD().get(session=session)
 
-        camera_reader = CameraReaderFactory.create(
-            self._camera.camera_type,
+        camera_reader = self._camera_reader_factory.create(
+            self._camera.type,
+            self._camera.model,
             self._camera.width,
             self._camera.height,
             self._camera.fps,
             self._camera.serial_num,
         )
 
-        self.camera_service = CameraService(camera_reader)
+        await self._camera_service.configure(camera_reader)
 
-    async def configure_processing(self):
-        self.processing_service = ProcessingService()
+        print("[CORE] Configured camera service")
+
+    async def configure_processing_service(self):
 
         current_product = await self._product_service.get_current()
 
-        await self.processing_service.configure(
-            SettingsService(session_proxy=self._session_proxy), current_product
+        processing_pipeline = self._processing_pipeline_factory.create(
+            current_product.model
         )
 
-    async def configure_detection(self):
-        self.detection_service = DetectionService(
+        await self._processing_service.configure(current_product, processing_pipeline)
+
+        print("[CORE] Configured processing service")
+
+    async def configure_detection_service(self):
+        self._detection_service = DetectionService(
             SettingsService(session_proxy=self._session_proxy),
             CurrentProductService(session_proxy=self._session_proxy),
             ResultService(self._session_proxy),
         )
 
+        print("[CORE] Configured detection service")
+
     async def start(self):
         await self.configure()
 
         try:
-            await self.camera_service.start()
+            await self._camera_service.start()
 
             self.visualization_service.start()
 
             while True:
-                camera_data = CameraData()
+                data = None
 
                 try:
-                    camera_data = await self.camera_service.read()
+                    data = await self._camera_service.read()
                 except Exception as error:
                     print(error)
                     continue
 
-                clusters = await self.processing_service.process(camera_data)
+                clusters, ground_plane = await self._processing_service.process(data)
 
-                cloud, _ = await self.detection_service.detect(clusters)
+                print("PROCESSED")
 
-                await self.visualize(cloud, camera_data.color_data[0])
+                cloud = await self._detection_service.detect(clusters, ground_plane)
+
+                print("DETECTED")
+
+                await self.visualize(cloud, data.get_color_data()[0])
 
                 await asyncio.sleep(0.001)
 
         except Exception as error:
             print(f"Error occured: {error}")
         finally:
-            await self.camera_service.stop()
+            await self._camera_service.stop()
             self.visualization_service.stop()
 
     async def visualize(self, cloud, color_frame):

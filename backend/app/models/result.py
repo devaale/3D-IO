@@ -9,16 +9,20 @@ if TYPE_CHECKING:
 class ResultBase(SQLModel):
     valid: bool = False
     depth_error: float = 0
+    row: int = 0
+    col: int = 0
+    position: str = ""
 
 
 class Result(ResultBase, table=True):
+    __table_args__ = {"extend_existing": True}
     id: Optional[int] = Field(default=None, primary_key=True)
     product_id: Optional[int] = Field(default=None, foreign_key="product.id")
     product: Optional["Product"] = Relationship(back_populates="position_results")
 
 
 class ResultCreate(ResultBase):
-    position_model_id: int = 1
+    product_id: int = 1
 
 
 class ResultUpdate(ResultBase):

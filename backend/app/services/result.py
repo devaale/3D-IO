@@ -10,7 +10,7 @@ from app.crud.result import ResultCRUD
 from app.models.result import ResultCreate
 from typing import List
 from app.services.settings import SettingsService
-from app.common.interfaces.session_proxy import SessionProxy
+from app.common.interfaces.database.session_proxy import SessionProxy
 from app.services.model import ModelService
 from app.models.region import RegionModel
 
@@ -25,14 +25,10 @@ class ResultService:
         self._model_service = ModelService(session_proxy)
         self._depth_validator = DepthValidator()
 
-    async def handle_detection(self, detection: PositionDetected):
+    async def handle_detection(self, detection: PositionDetected, product_id: int):
         self._model_action = (
             ModelAction.TRAIN.value if self._count < 3 else ModelAction.PREDICT.value
         )
-
-        product = await self._product_service.get_current()
-
-        product_id = product.id
 
         if self._model_action == ModelAction.TRAIN.value:
             position_model_id = await self.save_position_as_model(detection, product_id)
@@ -41,7 +37,6 @@ class ResultService:
                 _ = await self.save_region_as_model(region, position_model_id)
 
         elif self._model_action == ModelAction.PREDICT.value:
-
             position_model = await self._model_service.get_position_model(
                 detection.row, detection.col, product_id
             )
@@ -52,7 +47,13 @@ class ResultService:
                     region.position, position_model.id
                 )
 
-                _ = await self.save_detection_as_prediction(region, region_model)
+                _ = await self.save_detection_as_prediction(
+                    region,
+                    region_model,
+                    position_model.row,
+                    position_model.col,
+                    product_id,
+                )
 
         self._count += 1
 
@@ -94,30 +95,39 @@ class ResultService:
 
             async with session_scoped as session:
                 _ = await RegionModelCRUD().add(region, session)
-
+                print("SAVING REGION AS MODEL")
             return
 
         session_scoped = self._session_proxy.get()
 
         async with session_scoped as session:
             _ = await RegionModelCRUD().update(region_model, session)
+            print("UPDATING REGION AS MODEL.............................===>")
 
     async def save_detection_as_prediction(
-        self, detected_region: RegionDetected, model_region: RegionModel
+        self,
+        detected_region: RegionDetected,
+        model_region: RegionModel,
+        row: int,
+        col: int,
+        product_id: int,
     ):
         await self._settings_service.load()
 
-        accuracy = await self._settings_service.get("accuracy")
-
-        product = await self._product_service.get_current()
-
-        product_id = product.id
+        accuracy = await self._settings_service.get("depth_accuracy")
 
         valid, error = self._depth_validator.validate(
             model_region.depth_mean, detected_region.depth_mean, accuracy
         )
 
-        result = ResultCreate(valid=valid, depth_error=error, product_id=product_id)
+        result = ResultCreate(
+            valid=valid,
+            depth_error=error,
+            row=row,
+            col=col,
+            position=model_region.position,
+            product_id=product_id,
+        )
 
         session_scoped = self._session_proxy.get()
 

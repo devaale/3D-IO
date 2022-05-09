@@ -1,6 +1,8 @@
 import asyncio
 from app.services.core import CoreService
 from app.database.sql_session import AsyncSQLSessionProxy
+from hardware.camera.factory import AbstractCameraReaderFactory
+from app.processing.factory import PointCloudProcessingPipelineFactory
 
 
 class ServiceManager:
@@ -8,8 +10,11 @@ class ServiceManager:
         self._created = False
         self._core_task = None
 
-        self._session_proxy = AsyncSQLSessionProxy()
-        self._core_service = CoreService(self._session_proxy)
+        self._core_service = CoreService(
+            AsyncSQLSessionProxy(),
+            AbstractCameraReaderFactory(),
+            PointCloudProcessingPipelineFactory(),
+        )
 
     async def camera_start(self):
         if not self._created:
