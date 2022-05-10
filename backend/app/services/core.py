@@ -12,6 +12,7 @@ from app.services.settings import SettingsService
 from app.services.result import ResultService
 from app.crud.camera import CameraCRUD
 from app.common.interfaces.processing.pipeline_factory import ProcessingPipelineFactory
+from app.services.result_viz import VisualizerResult
 
 
 class CoreService:
@@ -36,6 +37,8 @@ class CoreService:
         self._visualization_service = None
 
         self._detection_service = None
+
+        self._visualizer_result = VisualizerResult()
 
     async def configure(self):
         await self.configure_camera_service()
@@ -89,10 +92,14 @@ class CoreService:
     async def start(self):
         await self.configure()
 
+        result = {0: True, 1: False, 2: True}
+
         try:
             await self._camera_service.start()
 
             self.visualization_service.start()
+
+            self._visualizer_result.create()
 
             while True:
                 data = None
@@ -112,6 +119,8 @@ class CoreService:
                 print("DETECTED")
 
                 await self.visualize(cloud, data.get_color_data()[0])
+
+                self._visualizer_result.update(result)
 
                 await asyncio.sleep(0.001)
 

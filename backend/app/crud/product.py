@@ -2,6 +2,10 @@ from typing import List
 from sqlmodel import select
 from app.models.product import Product, ProductCreate
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel.sql.expression import Select, SelectOfScalar
+
+SelectOfScalar.inherit_cache = True  # type: ignore
+Select.inherit_cache = True  # type: ignore
 
 
 class ProductCRUD:
@@ -29,6 +33,7 @@ class ProductCRUD:
         return obj
 
     async def delete(self, data: Product, session: AsyncSession) -> Product:
-        obj = await session.delete(data)
+        delete = await session.get(Product, data.id)
+        obj = await session.delete(delete)
         await session.commit()
         return obj

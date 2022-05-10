@@ -11,6 +11,7 @@ from app.services.settings import SettingsService
 from app.enums.region import RegionPosition
 from app.services.result import ResultService
 from app.processing.extractors.region import RegionExtractor
+from app.common.errors.detection import DetectionError
 
 
 class DetectionService:
@@ -30,27 +31,32 @@ class DetectionService:
         self, clusters: List[o3d.geometry.PointCloud], ground_plane
     ) -> List[PositionDetected]:
 
-        await self._settings.load()
+        try:
+            await self._settings.load()
 
-        product = await self._product.get_current()
+            product = await self._product.get_current()
 
-        region_size = await self._settings.get("region_size")
+            region_size = await self._settings.get("region_size")
 
-        for i, cluster in enumerate(clusters):
+            for i, cluster in enumerate(clusters):
 
-            row, col = PositionConverter.to_cell_position(i, product.col_count)
+                row, col = PositionConverter.to_cell_position(i, product.col_count)
 
-            detected_object = PositionDetected(row=row, col=col, plane_angle=0)
+                detected_object = PositionDetected(row=row, col=col, plane_angle=0)
 
-            detected_object.regions = self.detect_regions(
-                cluster, region_size, ground_plane
-            )
+                detected_object.regions = self.detect_regions(
+                    cluster, region_size, ground_plane
+                )
 
-            _ = await self._result_service.handle_detection(detected_object, product.id)
+                _ = await self._result_service.handle_detection(
+                    detected_object, product.id
+                )
 
-        cloud = pointcloud.clusters_to_cloud(clusters)
+            cloud = pointcloud.clusters_to_cloud(clusters)
 
-        return cloud
+            return cloud
+        except Exception as error:
+            raise DetectionError("Failed to detect")
 
     def detect_regions(
         self, cloud: o3d.geometry.PointCloud, region_size: float, ground_plane

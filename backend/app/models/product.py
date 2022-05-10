@@ -34,9 +34,13 @@ class ProductCreate(ProductBase):
     pass
 
 
+class ProductRead(ProductBase):
+    pass
+
+
 class ProductUpdate(ProductBase):
-    id: int
+    id: Optional[int]
 
 
 class ProductDelete(ProductBase):
-    id: int
+    id: Optional[int]

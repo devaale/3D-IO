@@ -3,7 +3,7 @@ import Slider from "@mui/material/Slider";
 import Typography from "@mui/material/Typography";
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
-
+import React, { Component } from 'react';
 import { useContext, useState } from "react";
 
 import events from "../../constants/events";

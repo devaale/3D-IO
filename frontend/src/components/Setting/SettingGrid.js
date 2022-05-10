@@ -2,7 +2,7 @@ import Grid from "@mui/material/Grid";
 import { Container } from "@mui/material";
 
 import SettingItem from "./SettingItem";
-
+import React, { Component } from 'react';
 import { useQuery } from "react-query";
 
 const SettingGrid = () => {
@@ -26,7 +26,7 @@ const SettingGrid = () => {
 
   return (
     <Container maxWidth="lg">
-      <Grid container spacing={4} marginTop={10}>
+      <Grid container spacing={2} marginTop={0}>
         {data &&
           data.map((setting) => (
             <SettingItem key={setting.id} setting={setting} />

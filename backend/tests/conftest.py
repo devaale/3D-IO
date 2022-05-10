@@ -1,4 +1,3 @@
-from webbrowser import get
 import pytest
 import open3d as o3d
 from starlette.testclient import TestClient

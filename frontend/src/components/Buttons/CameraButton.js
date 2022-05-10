@@ -2,7 +2,7 @@ import { useContext, useState } from "react";
 import { SocketContext } from "../../context/socket";
 import events from "../../constants/events";
 import Button from "@mui/material/Button";
-
+import React, { Component } from 'react';
 const CameraButton = () => {
     const socket = useContext(SocketContext);
     const [count, setCount] = useState(0);
@@ -16,8 +16,8 @@ const CameraButton = () => {
 
     return (
         <div>
-            <Button variant="contained" onClick={handleClick}>
-                CAMERA-START
+            <Button variant="outlined" color="success" onClick={handleClick}>
+                START
             </Button>
         </div>
     );

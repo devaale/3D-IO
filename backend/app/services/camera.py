@@ -1,6 +1,7 @@
 from typing import *
 from app.common.interfaces.camera.output import CameraOutput
 from app.common.interfaces.camera.reader import CameraReader
+from app.common.errors.camera import CameraError
 
 
 class CameraService:
@@ -13,16 +14,17 @@ class CameraService:
         try:
             return await self._camera_reader.connect()
         except Exception as error:
-            print(f"Camera connect error: {error}")
+            raise CameraError("Failed to start")
 
-    async def configure(self, camera_reader: CameraReader):
+    async def configure(self, camera_reader: CameraReader) -> bool:
         self._camera_reader = camera_reader
+        return self._camera_reader is not None
 
     async def read(self) -> CameraOutput:
         try:
             camera_data = await self._camera_reader.read(self.SAMPLE_COUNT)
         except Exception as error:
-            print(f"Camera read error: {error}")
+            raise CameraError("Failed to read")
 
         return camera_data
 
@@ -30,4 +32,4 @@ class CameraService:
         try:
             return not await self._camera_reader.disconnect()
         except Exception as error:
-            print(f"Camera disconnect error: {error}")
+            raise CameraError("Failed to stop")

@@ -3,6 +3,10 @@ from sqlmodel import select
 from app.models.position import PositionModel
 from app.models.position import PositionDetected
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel.sql.expression import Select, SelectOfScalar
+
+SelectOfScalar.inherit_cache = True  # type: ignore
+Select.inherit_cache = True  # type: ignore
 
 
 class PositionModelCRUD:
@@ -25,7 +29,8 @@ class PositionModelCRUD:
         return obj
 
     async def delete(self, data: PositionModel, session: AsyncSession) -> PositionModel:
-        obj = await session.delete(data)
+        delete = await session.get(PositionModel, data.id)
+        obj = await session.delete(delete)
         await session.commit()
         return obj
 

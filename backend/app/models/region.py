@@ -8,13 +8,13 @@ if TYPE_CHECKING:
 
 
 class RegionModelBase(SQLModel):
-    position: RegionPosition = RegionPosition.LEFT_BOT
-    depth_mean: float
+    position: Optional[RegionPosition] = RegionPosition.LEFT_BOT
+    depth_mean: Optional[float]
 
 
 class RegionModel(RegionModelBase, table=True):
     __table_args__ = {"extend_existing": True}
-    id: int = Field(default=None, primary_key=True)
+    id: Optional[int] = Field(default=None, primary_key=True)
     position_model_id: Optional[int] = Field(
         default=None, foreign_key="positionmodel.id"
     )
