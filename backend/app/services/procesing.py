@@ -30,6 +30,9 @@ class ProcessingService:
 
         return self._processing_pipeline is not None
 
+    async def configure_algorithm(self, algorithm_type: str):
+        self._processing_pipeline.set_algorithm(algorithm_type)
+
     async def process(self, data: CameraOutput):
         try:
             await self._settings_service.load()

@@ -1,3 +1,7 @@
+from turtle import Turtle
+from unittest import result
+
+from sqlalchemy import false, true
 from app.services.product import CurrentProductService
 from app.models.position import PositionDetected
 from app.crud.position import PositionModelCRUD
@@ -17,26 +21,26 @@ from app.models.region import RegionModel
 
 class ResultService:
     def __init__(self, session_proxy: SessionProxy) -> None:
+        self._result = True
         self._count = 0
-        self._model_action = ModelAction.TRAIN.value
         self._session_proxy = session_proxy
         self._settings_service = SettingsService(session_proxy)
         self._product_service = CurrentProductService(session_proxy)
         self._model_service = ModelService(session_proxy)
         self._depth_validator = DepthValidator()
 
-    async def handle_detection(self, detection: PositionDetected, product_id: int):
-        self._model_action = (
-            ModelAction.TRAIN.value if self._count < 3 else ModelAction.PREDICT.value
-        )
+    async def handle_detection(
+        self, detection: PositionDetected, product_id: int, command: ModelAction
+    ) -> bool:
+        self._result = True
 
-        if self._model_action == ModelAction.TRAIN.value:
+        if command == ModelAction.TRAIN.value:
             position_model_id = await self.save_position_as_model(detection, product_id)
 
             for region in detection.regions:
                 _ = await self.save_region_as_model(region, position_model_id)
 
-        elif self._model_action == ModelAction.PREDICT.value:
+        elif command == ModelAction.PREDICT.value:
             position_model = await self._model_service.get_position_model(
                 detection.row, detection.col, product_id
             )
@@ -47,7 +51,7 @@ class ResultService:
                     region.position, position_model.id
                 )
 
-                _ = await self.save_detection_as_prediction(
+                result = await self.save_detection_as_prediction(
                     region,
                     region_model,
                     position_model.row,
@@ -55,7 +59,12 @@ class ResultService:
                     product_id,
                 )
 
+                if result == False:
+                    self._result = False
+
         self._count += 1
+
+        return self._result
 
     async def save_position_as_model(
         self, detection: PositionDetected, product_id: int
@@ -111,7 +120,7 @@ class ResultService:
         row: int,
         col: int,
         product_id: int,
-    ):
+    ) -> bool:
         await self._settings_service.load()
 
         accuracy = await self._settings_service.get("depth_accuracy")
@@ -133,3 +142,5 @@ class ResultService:
 
         async with session_scoped as session:
             _ = await ResultCRUD().add(result, session)
+
+        return valid

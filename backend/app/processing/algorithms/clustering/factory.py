@@ -7,5 +7,4 @@ class ClusteringAlgorithmFactory:
         if clustering_algorithm == "DBSCAN":
             return ClusteringDBSCAN()
         else:
-            print(f"Clustering algorithm: {clustering_algorithm} doesn't exist")
-            raise ValueError()
+            return ClusteringDBSCAN()

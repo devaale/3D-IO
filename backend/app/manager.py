@@ -21,5 +21,11 @@ class ServiceManager:
             self._core_task = asyncio.create_task(self._core_service.start())
             self._created = True
 
-    async def camera_detect(self):
-        await self._core_service.manual_detection()
+    async def set_product_algorithm(self, algorithm_type: str):
+        self._core_service.set_processing_algorithm(algorithm_type)
+
+    async def detect(self):
+        await self._core_service.set_detect()
+
+    async def train(self):
+        await self._core_service.set_train()
