@@ -29,7 +29,10 @@ class DetectionService:
         self._angles = []
 
     async def detect(
-        self, clusters: List[o3d.geometry.PointCloud], ground_plane
+        self,
+        clusters: List[o3d.geometry.PointCloud],
+        ground_plane,
+        model_action: ModelAction,
     ) -> List[PositionDetected]:
 
         result = {}
@@ -52,7 +55,7 @@ class DetectionService:
                 )
 
                 valid = await self._result_service.handle_detection(
-                    detected_object, product.id
+                    detected_object, product.id, model_action
                 )
 
                 result[i] = valid

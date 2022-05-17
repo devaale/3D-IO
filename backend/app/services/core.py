@@ -136,7 +136,7 @@ class CoreService:
                 await self.visualize(cloud, data.get_color_data()[0])
 
                 if self._trigger_event.is_set():
-                    cloud, result = await self._detection_service.detect(
+                    _, result = await self._detection_service.detect(
                         clusters, ground_plane, self._command
                     )
 
