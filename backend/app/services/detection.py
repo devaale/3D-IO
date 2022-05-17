@@ -12,6 +12,7 @@ from app.enums.region import RegionPosition
 from app.services.result import ResultService
 from app.processing.extractors.region import RegionExtractor
 from app.common.errors.detection import DetectionError
+from app.enums.model import ModelAction
 
 
 class DetectionService:
@@ -31,6 +32,8 @@ class DetectionService:
         self, clusters: List[o3d.geometry.PointCloud], ground_plane
     ) -> List[PositionDetected]:
 
+        result = {}
+
         try:
             await self._settings.load()
 
@@ -48,15 +51,17 @@ class DetectionService:
                     cluster, region_size, ground_plane
                 )
 
-                _ = await self._result_service.handle_detection(
+                valid = await self._result_service.handle_detection(
                     detected_object, product.id
                 )
 
+                result[i] = valid
+
             cloud = pointcloud.clusters_to_cloud(clusters)
 
-            return cloud
+            return cloud, result
         except Exception as error:
-            raise DetectionError("Failed to detect")
+            raise DetectionError(f"Failed to detect: {error}")
 
     def detect_regions(
         self, cloud: o3d.geometry.PointCloud, region_size: float, ground_plane
