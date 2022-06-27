@@ -1,0 +1,13 @@
+aiosqlite==0.17.0
+alembic==1.7.6
+fastapi==0.74.1
+sqlmodel==0.0.6
+uvicorn==0.17.5
+uvicorn[standard]==0.17.5
+python-socketio==5.5.2
+pyrealsense2
+open3d
+
+#dev
+pytest==7.0.1
+requests==2.27.1
