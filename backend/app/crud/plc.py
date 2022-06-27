@@ -1,5 +1,6 @@
 from app.models.plc import Plc, PlcCreate
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel import select
 
 
 class CRUDPlc:
@@ -17,7 +18,8 @@ class CRUDPlc:
         return obj
 
     async def delete(self, data: Plc, session: AsyncSession) -> Plc:
-        obj = await session.delete(data)
+        delete = await session.get(Plc, data.id)
+        obj = await session.delete(delete)
         await session.commit()
         return obj
 

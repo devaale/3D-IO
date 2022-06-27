@@ -25,18 +25,18 @@ class PositionModel(PositionModelBase, table=True):
 
 
 class PositionModelCreate(PositionModelBase):
-    product_id: int
-    regions: List[RegionModelCreate]
+    product_id: Optional[int]
+    regions: Optional[List[RegionModelCreate]]
 
 
 class PositionModelUpdate(PositionModelBase):
-    id: int
+    id: Optional[int]
 
 
 class PositionModelDelete(PositionModelBase):
-    id: int
+    id: Optional[int]
 
 
 class PositionDetected(PositionModelBase):
     product_id: Optional[int]
-    regions: List[RegionDetected] = []
+    regions: Optional[List[RegionDetected]] = []

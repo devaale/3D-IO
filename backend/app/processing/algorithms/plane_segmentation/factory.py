@@ -7,7 +7,4 @@ class PlaneSegmentationAlgorithmFactory:
         if segmentation_algorithm == "RANSAC":
             return PlaneSegmentationRANSAC()
         else:
-            print(
-                f"Plane segmentation algorithm: {segmentation_algorithm} doesn't exist"
-            )
-            raise ValueError()
+            return PlaneSegmentationRANSAC()

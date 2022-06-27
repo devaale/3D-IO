@@ -35,8 +35,12 @@ class PlcBlockCreate(PlcBlockBase):
 
 
 class PlcBlockUpdate(PlcBlockBase):
-    id: int
+    id: Optional[int]
 
 
 class PlcBlockDelete(PlcBlockBase):
-    id: int
+    id: Optional[int]
+
+
+class PlcBlockRead(PlcBlockBase):
+    id: Optional[int]

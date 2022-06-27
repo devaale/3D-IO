@@ -3,7 +3,7 @@ import { useContext, useState, useEffect } from "react";
 import { SocketContext } from "../../context/socket";
 import ConnectionButton from "./ConnectionButton";
 import events from "../../constants/events";
-
+import React, { Component } from 'react';
 const ConnectionState = () => {
   const socket = useContext(SocketContext);
   const [connected, setConnected] = useState(false);

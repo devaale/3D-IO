@@ -3,6 +3,11 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.setting import Setting, SettingCreate
 
+from sqlmodel.sql.expression import Select, SelectOfScalar
+
+SelectOfScalar.inherit_cache = True  # type: ignore
+Select.inherit_cache = True  # type: ignore
+
 
 class CRUDSetting:
     def __init__(self) -> None:
@@ -24,7 +29,8 @@ class CRUDSetting:
         return obj
 
     async def delete(self, data: Setting, session: AsyncSession) -> Setting:
-        obj = await session.delete(data)
+        delete = await session.get(Setting, data.id)
+        obj = await session.delete(delete)
         await session.commit()
         return obj
 

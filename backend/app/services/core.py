@@ -1,4 +1,6 @@
 import asyncio
+from unittest import result
+from black import Mode
 import numpy as np
 from app.services.camera import CameraService
 from app.services.visualization import VisualizationService
@@ -12,6 +14,11 @@ from app.services.settings import SettingsService
 from app.services.result import ResultService
 from app.crud.camera import CameraCRUD
 from app.common.interfaces.processing.pipeline_factory import ProcessingPipelineFactory
+from app.services.result_viz import VisualizerResult
+from app.enums.model import ModelAction
+from asyncio import Event
+
+from app.processing.utils import pointcloud
 
 
 class CoreService:
@@ -36,6 +43,12 @@ class CoreService:
         self._visualization_service = None
 
         self._detection_service = None
+
+        self._visualizer_result = VisualizerResult()
+
+        self._command = ModelAction.PREDICT
+
+        self._trigger_event = Event()
 
     async def configure(self):
         await self.configure_camera_service()
@@ -86,6 +99,17 @@ class CoreService:
 
         print("[CORE] Configured detection service")
 
+    async def set_processing_algorithm(self, algorithm_type: str):
+        self._processing_service.configure_algorithm(algorithm_type)
+
+    async def set_detect(self):
+        self._command = ModelAction.PREDICT
+        self._trigger_event.set()
+
+    async def set_train(self):
+        self._command = ModelAction.TRAIN
+        self._trigger_event.set()
+
     async def start(self):
         await self.configure()
 
@@ -93,6 +117,8 @@ class CoreService:
             await self._camera_service.start()
 
             self.visualization_service.start()
+
+            self._visualizer_result.create()
 
             while True:
                 data = None
@@ -105,13 +131,18 @@ class CoreService:
 
                 clusters, ground_plane = await self._processing_service.process(data)
 
-                print("PROCESSED")
-
-                cloud = await self._detection_service.detect(clusters, ground_plane)
-
-                print("DETECTED")
+                cloud = pointcloud.clusters_to_cloud(clusters)
 
                 await self.visualize(cloud, data.get_color_data()[0])
+
+                if self._trigger_event.is_set():
+                    _, result = await self._detection_service.detect(
+                        clusters, ground_plane, self._command
+                    )
+
+                    self._visualizer_result.update(result)
+
+                    self._trigger_event.clear()
 
                 await asyncio.sleep(0.001)
 

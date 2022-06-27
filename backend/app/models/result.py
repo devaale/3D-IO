@@ -22,12 +22,12 @@ class Result(ResultBase, table=True):
 
 
 class ResultCreate(ResultBase):
-    product_id: int = 1
+    product_id: Optional[int] = 1
 
 
 class ResultUpdate(ResultBase):
-    id: int
+    id: Optional[int]
 
 
 class ResultDelete(ResultBase):
-    id: int
+    id: Optional[int]

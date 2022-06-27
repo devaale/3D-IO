@@ -56,6 +56,23 @@ async def update_setting(sid, data):
 
 
 @sio.event
+async def set_algorithm(sid, data):
+    algorithm_type = data["algorithm"]
+    # manager.set_product_algorithm(algorithm_type)
+    print(f"Setting algorithm {algorithm_type}")
+
+
+@sio.event
+async def detect(sid, data):
+    await manager.detect()
+
+
+@sio.event
+async def train(sid, data):
+    await manager.train()
+
+
+@sio.event
 async def update_product_model_selected(sid, data):
     pass
 

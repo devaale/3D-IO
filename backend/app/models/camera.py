@@ -18,3 +18,15 @@ class Camera(CameraBase, table=True):
 
 class CameraCreate(CameraBase):
     pass
+
+
+class CameraUpdate(CameraBase):
+    pass
+
+
+class CameraDelete(CameraBase):
+    pass
+
+
+class CameraRead(CameraBase):
+    pass

@@ -22,12 +22,12 @@ class PlcCreate(PlcBase):
 
 
 class PlcRead(PlcBase):
-    id: int
+    id: Optional[int]
 
 
 class PlcUpdate(PlcBase):
-    id: int
+    id: Optional[int]
 
 
 class PlcDelete(PlcBase):
-    id: int
+    id: Optional[int]

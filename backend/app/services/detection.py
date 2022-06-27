@@ -11,6 +11,8 @@ from app.services.settings import SettingsService
 from app.enums.region import RegionPosition
 from app.services.result import ResultService
 from app.processing.extractors.region import RegionExtractor
+from app.common.errors.detection import DetectionError
+from app.enums.model import ModelAction
 
 
 class DetectionService:
@@ -27,30 +29,42 @@ class DetectionService:
         self._angles = []
 
     async def detect(
-        self, clusters: List[o3d.geometry.PointCloud], ground_plane
+        self,
+        clusters: List[o3d.geometry.PointCloud],
+        ground_plane,
+        model_action: ModelAction,
     ) -> List[PositionDetected]:
 
-        await self._settings.load()
+        result = {}
 
-        product = await self._product.get_current()
+        try:
+            await self._settings.load()
 
-        region_size = await self._settings.get("region_size")
+            product = await self._product.get_current()
 
-        for i, cluster in enumerate(clusters):
+            region_size = await self._settings.get("region_size")
 
-            row, col = PositionConverter.to_cell_position(i, product.col_count)
+            for i, cluster in enumerate(clusters):
 
-            detected_object = PositionDetected(row=row, col=col, plane_angle=0)
+                row, col = PositionConverter.to_cell_position(i, product.col_count)
 
-            detected_object.regions = self.detect_regions(
-                cluster, region_size, ground_plane
-            )
+                detected_object = PositionDetected(row=row, col=col, plane_angle=0)
 
-            _ = await self._result_service.handle_detection(detected_object, product.id)
+                detected_object.regions = self.detect_regions(
+                    cluster, region_size, ground_plane
+                )
 
-        cloud = pointcloud.clusters_to_cloud(clusters)
+                valid = await self._result_service.handle_detection(
+                    detected_object, product.id, model_action
+                )
 
-        return cloud
+                result[i] = valid
+
+            cloud = pointcloud.clusters_to_cloud(clusters)
+
+            return cloud, result
+        except Exception as error:
+            raise DetectionError(f"Failed to detect: {error}")
 
     def detect_regions(
         self, cloud: o3d.geometry.PointCloud, region_size: float, ground_plane

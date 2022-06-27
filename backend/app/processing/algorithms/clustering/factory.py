@@ -1,4 +1,5 @@
 from app.processing.algorithms.clustering.dbscan import ClusteringDBSCAN
+from app.processing.algorithms.clustering.hdbscan import ClusteringHDBSCAN
 
 
 class ClusteringAlgorithmFactory:
@@ -7,5 +8,4 @@ class ClusteringAlgorithmFactory:
         if clustering_algorithm == "DBSCAN":
             return ClusteringDBSCAN()
         else:
-            print(f"Clustering algorithm: {clustering_algorithm} doesn't exist")
-            raise ValueError()
+            return ClusteringDBSCAN()
